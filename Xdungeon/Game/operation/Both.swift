@@ -18,49 +18,28 @@ class Both: Operation {
     private var left:  (isSetMuler: Bool, block: Block)?
     private var right: (isSetMuler: Bool, block: Block)?
     
-    private var start: CFTimeInterval?
-    private var isPrepared = false
-    
     var waitAndMove: SKAction!
-    
-    // empty = Num(true, 1, 0)
-    
-    override init() {
-        super.init()
-    }
     
     convenience init(btn: BothButton) {
         self.init()
         bothBtn = btn
         bothBtn.isSelected = true
         
-        /**--------------------------------------------------------------*/
-        let initFadeIn = SKAction.sequence([SKAction.fadeOut(withDuration: 0),
-                                        SKAction.wait(forDuration: 0.02),
-                                        SKAction.fadeIn(withDuration: 0.1)])
-        let initMove = SKAction.moveTo(y: 0, duration: 0.24)
-        waitAndMove = SKAction.sequence([initFadeIn,initMove])
-        /**--------------------------------------------------------------*/
+        fm.startAmination(duration: 0.24)
         
-        
-        let move = SKAction.moveTo(y: fs.splitBase, duration: 0.24)
-        
-        let wait    = SKAction.wait(forDuration: 0.12)
-        let fadeout = SKAction.fadeOut(withDuration: 0.12)
-        let fadeIn = SKAction.fadeIn(withDuration: 0.12)
-        
-        let moveAndFadeOut = SKAction.group([move, SKAction.sequence([wait, fadeout])])
-        let action = SKAction.sequence([moveAndFadeOut, fadeIn])
-        
-        for b in firstLayblocks {
-            b.run(action)
-            b.ftrPoint.y = fs.splitBase
-        }
-        
-        for btn in stnry.bothBtns {
-            if !btn.isSelected { btn.run(SKAction.moveTo(y: -fs.h40 * 2, duration: 0.24)) }
+        let move = SKAction.moveTo(y: fs.splitBase, duration: drtn!)
+        for b in firstLayblocks { b.run(move); b.ftrPoint.y = fs.splitBase }
+        for btn in bthbtn.bothBtns {
+            if !btn.isSelected { btn.run(SKAction.moveTo(y: -fs.h40 * 2, duration: drtn!)) }
         }
         makeSelect()
+        let nextAction = SKAction.run {
+            fm.startAmination(duration: 0.12)
+            self.prepareFormula()
+            fm.resetBlocks()
+        }
+        fm.run(SKAction.sequence([SKAction.wait(forDuration: 0.24),
+                                  nextAction]))
     }
     
     func prepareFormula() {
@@ -130,24 +109,23 @@ class Both: Operation {
     func makeParent(children: [Block]) -> Parnt {
         guard children.count > 1 else { fatalError() }
         let parentID = NSUUID().uuidString
-        let cm = Multi(parentID: parentID, isFirst: true, level: 0, num: Num(true, 1, 0))
+        let cm = Multi(parentID: parentID, level: 0, num: Num(true, 1, 0))
         cm.name = NSUUID().uuidString
+        cm.setIsFirst(true)
         
         for c in children {
             c.position.y = 0
             c.ftrPoint.y = 0
-            c.removeAllActions()
-            c.run(SKAction.fadeIn(withDuration: 0))
         }
-        let p = Parnt(parentID: "", isFirst: true, level: 0, multi: cm, blocks: children)
+        let p = Parnt(parentID: "", level: 0, multi: cm, blocks: children)
         p.name = parentID
+        p.setIsFirst(true)
         p.changeShape(shapeState: .none)
         p.incrementChilrenLevel()
         return p
     }
     
     func setEmptyMuler(block: Block) -> Block {
-        
         if let p = block as? Parnt {
             p.cm.addMuler(ss: .emphasize, num: Num(true, 1, 0))
             return p
@@ -160,41 +138,51 @@ class Both: Operation {
     
     func makeSelect() {
         let i: Int = bothBtn.int
+        let isLeft = bothBtn.position.x < 0
+        
+        if i == 1 {
+            selects.append(BothSelect(num: Num(false, 1, 1)))
+            bthbtn.addChild(selects.first!)
+            let unitV = (CGPoint(x: 0, y: fs.width) - bothBtn.position).unit
+            let btnPoint = bothBtn.position + unitV * fs.bothsr
+            selects.first!.position = bothBtn.position
+            let fadeInAndMove = SKAction.group([SKAction.fadeIn(withDuration: drtn! * 0.2),
+                                                SKAction.move(to: btnPoint, duration: drtn! * 0.2)])
+            let action = SKAction.sequence([SKAction.fadeOut(withDuration: 0), fadeInAndMove])
+            selects.first!.run(action)
+            return
+        }
+        
         selects.append(BothSelect(num: Num(true, i, 1)))
         selects.append(BothSelect(num: Num(false, i, 1)))
         selects.append(BothSelect(num: Num(true, 1, i)))
         selects.append(BothSelect(num: Num(false, 1, i)))
         
-        let isLeft = bothBtn.position.x < 0
-        
         let resultV = getStartVector(isLeft: isLeft)
         let startPosition = getStartPosition(vector: resultV)
         let points = get4Positions(isLeft: isLeft, start: startPosition)
-        var sequences: [ArraySlice<CGPoint>] = []
-        
-        for i in 0...3 { sequences.append(points.prefix(4 - i)) }
         
         if isLeft {
             for (i, btn) in selects.enumerated() {
-                stnry.addChild(btn)
+                bthbtn.addChild(btn)
                 btn.position = bothBtn.position
 
-                let follow = makeMoveActions(points: sequences[i], d: 0.05)
-                let fadeInAndMove = SKAction.group([SKAction.fadeIn(withDuration: 0.06), follow])
+                let follow = SKAction.move(to: points[i], duration: drtn! * 0.2)
+                let fadeInAndMove = SKAction.group([SKAction.fadeIn(withDuration: drtn! * 0.2), follow])
                 let action = SKAction.sequence([SKAction.fadeOut(withDuration: 0),
-                                                SKAction.wait(forDuration: 0.06 * Double(i)),
+                                                SKAction.wait(forDuration: drtn! * 0.2 * Double(i)),
                                                 fadeInAndMove])
                 btn.run(action)
             }
         } else {
             for (i, btn) in selects.reversed().enumerated() {
-                stnry.addChild(btn)
+                bthbtn.addChild(btn)
                 btn.position = bothBtn.position
                 
-                let follow = makeMoveActions(points: sequences[i], d: 0.05)
-                let fadeInAndMove = SKAction.group([SKAction.fadeIn(withDuration: 0.06), follow])
+                let follow = SKAction.move(to: points[i], duration: drtn! * 0.2)
+                let fadeInAndMove = SKAction.group([SKAction.fadeIn(withDuration: drtn! * 0.2), follow])
                 let action = SKAction.sequence([SKAction.fadeOut(withDuration: 0),
-                                                SKAction.wait(forDuration: 0.06 * Double(i)),
+                                                SKAction.wait(forDuration: drtn! * 0.2 * Double(i)),
                                                 fadeInAndMove])
                 btn.run(action)
             }
@@ -223,6 +211,7 @@ class Both: Operation {
         var vrtclVector: CGPoint = isLeft ? tmpVrtcl : -tmpVrtcl
         
         var points: [CGPoint] = [start]
+        
         for _ in 0...2 {
             let long = baseVector + vrtclVector
             baseVector = long.unit * fs.bothsr
@@ -231,16 +220,11 @@ class Both: Operation {
             tmpVrtcl = CGPoint(x: baseVector.y, y: -baseVector.x) * tan(angle)
             vrtclVector = !isLeft ? tmpVrtcl : -tmpVrtcl
         }
+        
         return points
     }
     
-    private func makeMoveActions(points: ArraySlice<CGPoint>, d: TimeInterval) -> SKAction {
-        var moveActs: [SKAction] = []
-        for p in points { moveActs.append(SKAction.move(to: p, duration: d)) }
-        return SKAction.sequence(moveActs)
-    }
-    
-    override func touchBegan(touch: UITouch, node: SKNode) { }
+    override func touchBegan(touch: UITouch, node: SKNode) { isTouched = true }
     
     override func touchMoved(touch: UITouch, node: SKNode) {
         if let bs = node.parent as? BothSelect {
@@ -263,6 +247,8 @@ class Both: Operation {
                 t.isChangeContent = true
             }
         }
+        fm.startAmination(duration: 0.06)
+        fm.resetBlocks()
     }
     
     func getTargetBlock() -> [NumBlock] {
@@ -287,34 +273,47 @@ class Both: Operation {
     }
     
     override func touchEnded(touch: UITouch, node: SKNode) {
+        isTouched = false
         guard nowSelect != nil else { leave(); op = Trans(); return }
-        let targets = getTargetBlock()
-        for t in targets {
-            t.changeShape(shapeState: .have, fillColor: clr.shape)
-            t.isChangeContent = true
-        }
-        
-        for b in allBlocks {
-            if !(b is Equal) {
-                b.changeShape(shapeState: .have)
-            }
-            if b.level == 0  {
-                b.run(waitAndMove)
-                b.ftrPoint.y = 0
-            }
-        }
         
         bothBtn.isSelected = false
-        for btn in stnry.bothBtns {
+        for btn in bthbtn.bothBtns {
             btn.run(SKAction.moveTo(y: -fs.h40, duration: 0.24))
         }
         
         for s in selects { s.removeFromParent() }
         
+        
+        let targets = getTargetBlock()
+        for t in targets { t.ss = .have; t.isChangeContent = true }
+        
+        let nextAction = SKAction.run {
+            fm.startAmination(duration: 0.12)
+            for b in allBlocks {
+                if b.level == 0  {
+                    b.run(SKAction.moveTo(y: 0, duration: drtn!))
+                    b.ftrPoint.y = 0
+                }
+            }
+        }
+        
+        fm.startAmination(duration: 0.12)
+        for b in allBlocks { if !(b is Equal) { b.ss = .have; b.isChangeContent = true }}
+        fm.resetBlocks()
+        fm.run(SKAction.sequence([SKAction.wait(forDuration: 0.12), nextAction]))
+        
         op = Trans()
     }
     
     private func leave() {
+        
+        bothBtn.isSelected = false
+        for btn in bthbtn.bothBtns {
+            btn.run(SKAction.moveTo(y: -fs.h40, duration: 0.24))
+        }
+        
+        for s in selects { s.removeFromParent() }
+        
         if let l = left {
             undo(side: l)
         }
@@ -322,30 +321,23 @@ class Both: Operation {
         if let r = right {
             undo(side: r)
         }
-        
-        let fadeIn = SKAction.sequence([SKAction.fadeOut(withDuration: 0),
-                                        SKAction.wait(forDuration: 0.02),
-                                        SKAction.fadeIn(withDuration: 0.1)])
-        let move = SKAction.moveTo(y: 0, duration: 0.24)
-        let waitAndMove = SKAction.sequence([fadeIn,move])
-        
-        for b in allBlocks {
-            if !(b is Equal) {
-                b.ss = .have
-                b.shape!.fillColor = clr.shape
-            }
-            if b.level == 0  {
-                b.run(waitAndMove)
-                b.ftrPoint.y = 0
+        let nextAction = SKAction.run {
+            fm.startAmination(duration: 0.12)
+            for b in allBlocks {
+                if !(b is Equal) {
+                    b.ss = .have
+                    b.shape!.fillColor = clr.shape
+                }
+                if b.level == 0  {
+                    b.run(SKAction.moveTo(y: 0, duration: drtn!))
+                    b.ftrPoint.y = 0
+                }
             }
         }
         
-        bothBtn.isSelected = false
-        for btn in stnry.bothBtns {
-            btn.run(SKAction.moveTo(y: -fs.h40, duration: 0.24))
-        }
-        
-        for s in selects { s.removeFromParent() }
+        fm.startAmination(duration: 0.12)
+        fm.resetBlocks()
+        fm.run(SKAction.sequence([SKAction.wait(forDuration: 0.12), nextAction]))
     }
     
     func removeParnt(p: Parnt) {
@@ -388,10 +380,10 @@ class Both: Operation {
     func undo(side:(isSetMuler: Bool, block: Block)) {
         if side.isSetMuler {
             if let p = side.block as? Parnt {
-                p.cm.removeLastMuler(duration: 0.12)
+                p.cm.removeLastMuler()
             } else {
                 guard let nb = side.block as? NumBlock else { fatalError("Parnt以外であれば必ずNumBlock") }
-                nb.removeLastMuler(duration: 0.12)
+                nb.removeLastMuler()
             }
         } else {
             guard let p = side.block as? Parnt else { fatalError("ここでは必ずmakeParent済み") }
@@ -400,10 +392,6 @@ class Both: Operation {
     }
     
     override func update(_ currentTime: TimeInterval) {
-        guard let s = start else { start = currentTime; return }
-        if s + 0.24 < currentTime && !isPrepared {
-            isPrepared = true
-            prepareFormula()
-        }
+        
     }
 }

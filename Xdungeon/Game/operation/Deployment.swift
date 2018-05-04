@@ -15,12 +15,13 @@ class Deployment: Operation {
     private var tPoint:     CGPoint? // touch point
     private var parent:     Parnt!
     
-    private let drtin: TimeInterval = 0.6
-    
-    init(_ parent: Parnt) {
+    override init() {
         super.init()
+    }
+    
+    convenience init(parent: Parnt) {
+        self.init()
         self.parent = parent
-        
         parent.prepareDeployment()
     }
     
@@ -28,13 +29,14 @@ class Deployment: Operation {
     // leave   -> touchBegan: parent.cancelDeployment()
     
     override func touchBegan(touch: UITouch, node: SKNode) {
+        isTouched = true
         guard let block = node.parent as? Block else { return }
         guard let multi = block as? Multi else {
             parent.cancelDeployment()
+            fm.startAmination(duration: 0.24)
             op = Trans()
             op.touchBegan(touch: touch, node: node)
-            operationLabel.text = op.operation
-            for btn in stnry.bothBtns { btn.run(SKAction.moveTo(y: -fs.h40, duration: drtin))}
+            for btn in bthbtn.bothBtns { btn.run(SKAction.moveTo(y: -fs.h40, duration: drtn!))}
             return
         }
         
@@ -49,12 +51,14 @@ class Deployment: Operation {
     }
     
     private func changeStructure(p: Parnt) {
-        let cbs = p.deploy(duration: drtin) // child blocks
+        fm.startAmination(duration: 0.48)
+        let cbs = p.deploy() // child blocks
         if let pp = p.parent as? Parnt {
             let index = pp.childBlocks.index(of: p)!
             pp.childBlocks.remove(at: index)
             pp.childBlocks.insert(contentsOf: cbs, at: index)
             for c in cbs { c.move(toParent: pp) }
+            pp.isChangeContent = true
         } else {
             let index = firstLayblocks.index(of: p)!
             firstLayblocks.remove(at: index)
@@ -66,10 +70,16 @@ class Deployment: Operation {
         let mIndex = allBlocks.index(of: p.cm)!
         allBlocks.remove(at: mIndex)
         fm.setMaxLevel()
-        for btn in stnry.bothBtns {
-            btn.run(SKAction.moveTo(y: -fs.h40, duration: drtin))
+        for btn in bthbtn.bothBtns {
+            btn.run(SKAction.moveTo(y: -fs.h40, duration: drtn!))
         }
-        op = Animation(Trans(), duration: drtin)
+        let nextAction = SKAction.run {
+            fm.startAmination(duration: 0.12)
+            fm.resetBlocks()
+        }
+        fm.run(SKAction.sequence([SKAction.wait(forDuration: 0.48), nextAction]))
+        op = Trans()
+        print(firstLayblocks)
     }
     
     override func touchMoved(touch: UITouch, node: SKNode) {
@@ -83,10 +93,13 @@ class Deployment: Operation {
     
     private func connectLine(touchBlock tb: Block, parent p: Parnt) {
         for (i, child) in p.childBlocks.enumerated() {
-            if let p = child as? Parnt {
-                let c = p.cm!
-                let distance = pow(tb.position.x - c.position.x, 2) + pow(tb.position.y - c.position.y, 2)
-                if distance < fs.bsz * fs.bsz / 4 && !c.dcl!.isConnected {
+            if let childAsParent = child as? Parnt {
+                
+                let c = childAsParent.cm!
+                let bp: CGPoint = childAsParent.position + c.position
+                
+                let distance = bp.distance(from: tb.position)
+                if distance < fs.bsz / 4 && !c.dcl!.isConnected {
                     p.connectLine(index: i)
                     let move = SKAction.move(to: CGPoint(x: tb.ftrPoint.x, y: 0), duration: 0)
                     let setZ = SKAction.run({ tb.zPosition = tb.level })
@@ -96,8 +109,8 @@ class Deployment: Operation {
                 }
             }
             if let c = child as? NumBlock {
-                let distance = pow(tb.position.x - c.position.x, 2) + pow(tb.position.y - c.position.y, 2)
-                if distance < fs.bsz * fs.bsz / 4 && !c.dcl!.isConnected {
+                let distance = tb.position.distance(from: c.position)
+                if distance < fs.bsz / 4 && !c.dcl!.isConnected {
                     p.connectLine(index: i)
                     let move = SKAction.move(to: CGPoint(x: tb.ftrPoint.x, y: 0), duration: 0)
                     let setZ = SKAction.run({ tb.zPosition = tb.level })
@@ -116,6 +129,7 @@ class Deployment: Operation {
     }
     
     override func touchEnded(touch: UITouch, node: SKNode) {
+        isTouched = false
         guard let tb = touchBlock else { return }
         tb.zPosition = tb.level
         tb.run(SKAction.move(to: CGPoint(x: tb.ftrPoint.x, y: 0), duration: 0.15))

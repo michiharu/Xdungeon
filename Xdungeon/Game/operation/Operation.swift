@@ -9,12 +9,10 @@ import SpriteKit
 
 class Operation {
     var operation: String { get { return "Operation"}}
-    let moveUp   = SKAction.moveTo(y: fs.splitBase, duration: 0.36)
-    let moveOrigin = SKAction.moveTo(y: 0,      duration: 0.36)
+    var isTouched = false
     
     init() {
-        moveUp  .timingMode = .easeInEaseOut
-        moveOrigin.timingMode = .easeInEaseOut
+        print(operation)
     }
     
     func touchBegan(touch: UITouch, node: SKNode) {fatalError("このメソッドはオーバーライドされなければなりません！")}

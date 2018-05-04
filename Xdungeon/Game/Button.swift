@@ -14,6 +14,8 @@ class Button: SKNode {
         fatalError("init(coder:) has not been implemented")
     }
     
+    var shape: SKShapeNode!
+    
     override init() {
         super.init()
     }
@@ -25,6 +27,31 @@ class Button: SKNode {
     }
 }
 
+class PauseButton: Button {
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    let pause: SKLabelNode = SKLabelNode(fontNamed: font)
+    
+    override init() {
+        super.init()
+        self.zPosition = 100
+        
+        shape = SKShapeNode(rectOf: CGSize(width: fs.fsz, height: fs.fsz), cornerRadius: fs.space)
+        shape.fillColor = .clear
+        shape.lineWidth = 0
+        addChild(shape)
+        
+        pause.run(SKAction.rotate(byAngle: CGFloat.pi * 0.5, duration: 0))
+        pause.verticalAlignmentMode = .center
+        pause.text = "="
+        pause.fontSize = fs.fsz
+        pause.fontColor = clr.xcdf
+        addChild(pause)
+    }
+}
+
 class ChoiceButton: Button {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -32,7 +59,6 @@ class ChoiceButton: Button {
     
     var isX: Bool!
     
-    var shape: SKShapeNode!
     var line : SKShapeNode!
     var color: SKColor!
     
@@ -68,8 +94,8 @@ class ChoiceButton: Button {
         width = w < fs.minbw ? fs.minbw : w
 
         shape = SKShapeNode(rectOf: CGSize(width: width, height: fs.bsz), cornerRadius: fs.cr)
-        shape.lineWidth = fs.hlw
-        shape.glowWidth = fs.hglw
+        shape.lineWidth = fs.hlw / fm.scale
+        shape.glowWidth = fs.hglw / fm.scale
         shape.strokeColor = color
         shape.fillColor = clr.shape
         shape.zPosition = 0
@@ -89,8 +115,6 @@ class BothButton: Button {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    var shape: SKShapeNode!
     
     var int: Int!
     let label = SKLabelNode(fontNamed: font)
@@ -131,8 +155,6 @@ class BothSelect: Button {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    var shape: SKShapeNode!
     
     var num: Num!
     let nl = NumLabel()

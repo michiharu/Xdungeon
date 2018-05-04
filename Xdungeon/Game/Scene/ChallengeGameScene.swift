@@ -9,37 +9,31 @@
 import SpriteKit
 import GameplayKit
 
-let font = "Arial"
-let bracketFont = "Baskerville"
-let xFont = "Cochin-BoldItalic"
-let BRING_TO_FRONT: CGFloat = 10
+class ChallengeGameScene: SKScene {
+    
+    var storyboard: UIStoryboard!
+    var gvc: GameViewController!
 
-var fs: FitSize!
-let u = Util()
-let dr = Duration()
-
-var clr = Color()
-var choiceCount = 3
-
-var op: Operation = Trans()
-let operationLabel = SKLabelNode(fontNamed: font)
-
-var isAdjustAllBlocks = true
-var maxLevel: CGFloat!
-var allBlocks: [Block] = []
-var firstLayblocks: [Block] = []
-
-var fm    : Formula!
-var stnry : Stationary!
-
-var pause : SKShapeNode!
-var clear : SKShapeNode!
-
-var start: Date!
-
-class GameScene: SKScene {
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override init(size: CGSize) {
+        super.init(size: size)
+    }
+    
+    convenience init(storyboard: UIStoryboard, gvc: GameViewController,size: CGSize) {
+        self.init(size: size)
+        self.storyboard = storyboard
+        self.gvc = gvc
+    }
     
     override func didMove(to view: SKView) {
+        view.ignoresSiblingOrder = true
+        view.showsFPS = true
+        view.showsNodeCount = true
+        
+        initValues()
         initField()
     }
 
@@ -60,6 +54,8 @@ class GameScene: SKScene {
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         let tf = touches.first!
         let tn = self.atPoint(tf.location(in: self))
+        if tn.parent is PauseButton { gvc.pause() }
+        
         op.touchEnded(touch: tf, node: tn)
     }
     
@@ -71,25 +67,37 @@ class GameScene: SKScene {
     
     override func update(_ currentTime: TimeInterval) {
         op.update(currentTime)
-        fm.update()
+        guard !fm.isAminated else { return }
+        top.update(gvc)
+    }
+    
+    func initValues() {
+        fs = FitSize(w: self.frame.width, h: self.frame.height)
+        clr.mode = WhiteBase()
+        choiceCount = 5
+        score = 0
+        drtn = 0
     }
     
     func initField() {
-        clr.mode = Neon()
         backgroundColor = clr.bgc
-        fs = FitSize(w: self.frame.width, h: self.frame.height)
         
-        operationLabel.position = CGPoint(x: fs.bsz, y: fs.height - fs.fsz)
-        addChild(operationLabel)
+        let pause: PauseButton = PauseButton()
+        pause.position = CGPoint(x: fs.width - fs.fsz * 0.5 - fs.space, y: fs.height - (fs.fsz + fs.space) * 0.5)
+        self.addChild(pause)
+        
+        top = ChallengeTopBar()
+        top.position = CGPoint(x: self.frame.midX, y: self.frame.midY)
+        self.addChild(top)
         
         fm = Formula()
         fm.position = CGPoint(x: self.frame.midX, y: self.frame.midY)
-        fm.name = "formula"
         self.addChild(fm)
         
-        stnry = Stationary()
-        stnry.position = CGPoint(x: self.frame.midX, y: self.frame.midY)
-        stnry.name = "stationary"
-        self.addChild(stnry)
+        bthbtn = BothButtonController()
+        bthbtn.position = CGPoint(x: self.frame.midX, y: self.frame.midY)
+        self.addChild(bthbtn)
+        
+        fm.newQuestion()
     }
 }

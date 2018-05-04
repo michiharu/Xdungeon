@@ -9,9 +9,11 @@
 import SpriteKit
 
 class Color {
-    var mode: Mode = Neon()
+    var mode: ColorMode = WhiteBase()
     
     var bgc:    SKColor { get { return mode.bgc   }}
+    var mdlbg:  SKColor { get { return mode.mdlbg }}
+    var xcdf:   SKColor { get { return mode.xcdf  }}
     
     var shape:  SKColor { get { return mode.shape }}
     
@@ -34,9 +36,11 @@ class Color {
     var btslc:  SKColor { get { return mode.btslc }}
 }
 
-class Mode {
+class ColorMode {
     
     var bgc:    SKColor { get { return SKColor.black }}
+    var mdlbg:  SKColor { get { return SKColor.black }}
+    var xcdf:   SKColor { get { return SKColor.black }}
     
     var shape:  SKColor { get { return SKColor.black }}
     var eql:    SKColor { get { return SKColor.black }}
@@ -59,8 +63,10 @@ class Mode {
 }
 
 
-class Neon: Mode {
+class Neon: ColorMode {
     override var bgc: SKColor { get { return SKColor(red: 0.05, green: 0.05, blue: 0.05, alpha: 1)}}
+    override var mdlbg: SKColor { get { return SKColor(red: 0.05, green: 0.05, blue: 0.05, alpha: 0.5)}}
+    
     
     override var shape: SKColor { get { return SKColor(red: 0.80, green: 0.80, blue: 0.80, alpha: 0.15) }}
     override var eql:   SKColor { get { return SKColor.white }}
@@ -83,34 +89,35 @@ class Neon: Mode {
     override var btslc: SKColor { get { return SKColor(red: 0.90, green: 0.90, blue: 0.90, alpha: 1.0) }}
 }
 
-class Material: Mode {
+class Material: ColorMode {
     
 }
 
-class WhiteBase: Mode {
-    override var bgc: SKColor { get { return SKColor(red: 0.97, green: 0.97, blue: 0.97, alpha: 1)}}
+class WhiteBase: ColorMode {
+    override var bgc: SKColor { get { return SKColor(red: 0.95, green: 0.95, blue: 0.95, alpha: 1)}}
+    override var xcdf: SKColor  { get { return SKColor(red: 0, green: 0.5, blue: 1, alpha: 1) }}
     
-    override var shape: SKColor { get { return SKColor(red: 0.20, green: 0.20, blue: 0.20, alpha: 0.10) }}
+    override var shape: SKColor { get { return SKColor(red: 0.20, green: 0.20, blue: 0.20, alpha: 0.05) }}
     override var eql:   SKColor { get { return SKColor.black }}
     override var brckt: SKColor { get { return SKColor.black }}
     override var zero:  SKColor { get { return SKColor.black }}
     override var quest: SKColor { get { return SKColor(red: 1.00, green: 1.00, blue: 1.00, alpha: 1.0) }}
     
-    override var xplus: SKColor { get { return SKColor(red: 1.00, green: 0.25, blue: 0.40, alpha: 1.0) }}
-    override var xminu: SKColor { get { return SKColor(red: 0.00, green: 0.80, blue: 1.00, alpha: 1.0) }}
-    override var cplus: SKColor { get { return SKColor(red: 1.00, green: 0.35, blue: 0.55, alpha: 1.0) }}
-    override var cminu: SKColor { get { return SKColor(red: 0.20, green: 0.90, blue: 1.00, alpha: 1.0) }}
+    override var xplus: SKColor { get { return SKColor(red: 0.50, green: 0.00, blue: 0.15, alpha: 1.0) }}
+    override var xminu: SKColor { get { return SKColor(red: 0.00, green: 0.30, blue: 0.50, alpha: 1.0) }}
+    override var cplus: SKColor { get { return SKColor(red: 0.60, green: 0.00, blue: 0.20, alpha: 1.0) }}
+    override var cminu: SKColor { get { return SKColor(red: 0.00, green: 0.45, blue: 0.60, alpha: 1.0) }}
     
     
     override var slctd: SKColor { get { return SKColor(red: 0.40, green: 1.00, blue: 0.20, alpha: 1.0) }}
     override var chln : SKColor { get { return SKColor(red: 0.30, green: 1.00, blue: 0.50, alpha: 1.0) }}
-    override var chadd: SKColor { get { return SKColor(red: 0.30, green: 1.00, blue: 0.50, alpha: 1.0) }}
+    override var chadd: SKColor { get { return SKColor(red: 1.00, green: 0.40, blue: 0.70, alpha: 1.0) }}
     override var chbtn: SKColor { get { return SKColor(red: 0.80, green: 0.80, blue: 0.80, alpha: 0.15) }}
     override var both : SKColor { get { return SKColor(red: 1.00, green: 0.45, blue: 0.60, alpha: 1.0) }}
     override var bothf: SKColor { get { return SKColor(red: 0.20, green: 0.20, blue: 1.00, alpha: 1.0) }}
     override var btslc: SKColor { get { return SKColor(red: 0.20, green: 0.20, blue: 1.00, alpha: 1.0) }}
 }
 
-class Classic: Mode {
+class Classic: ColorMode {
     
 }

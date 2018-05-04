@@ -43,6 +43,7 @@ class Choice: Operation {
     fileprivate func changeFormula()                        { fatalError("このメソッドはオーバーライドされなければなりません！") }
     
     func prepareFormula() {
+        let moveUp = SKAction.moveTo(y: fs.splitBase, duration: 0.36)
         for b in allBlocks {
             b.ss = .none
             for s in selects { if b == s { b.ss = .have }}
@@ -135,16 +136,14 @@ class Choice: Operation {
             let wrong7 = makeWrongAnswer6(nums)
             if !answers.contains(wrong7) { answers.append(wrong7) }
         }
-        
-        for (i, _) in answers.enumerated() {
-            answers.swapAt(answers.count - (i + 1), (u.randNum(seed: answers.count - i) - 1))
-        }
-        return answers
+    
+        return answers.shuffled
     }
     
     fileprivate final func getBtnX(seed: CGFloat, bw: CGFloat, count: Int) -> [CGFloat] {
         
         let tw: CGFloat = (bw + fs.space * 2) * CGFloat(count)
+        fm.changeScale(contentWidth: tw)
         var positions: [CGFloat] = []
         var a: CGFloat
         
@@ -189,29 +188,29 @@ class Choice: Operation {
         
         // ボタンの移動と削除
         choice.line!.removeFromParent()
-        let move = SKAction.move(to: CGPoint(x: targetX, y: 0), duration: 0.4)
+        let move = SKAction.move(to: CGPoint(x: targetX, y: 0), duration: drtn!)
         move.timingMode = .easeInEaseOut
-        let moveAndFadeOut = SKAction.group([move, SKAction.fadeOut(withDuration: 0.4)])
+        let moveAndFadeOut = SKAction.group([move, SKAction.fadeOut(withDuration: drtn!)])
         
         choice.run(SKAction.sequence([moveAndFadeOut, SKAction.removeFromParent()]))
         for c in choices { if !c.isCorrect { c.removeFromParent() }}
-        
+        let moveOrigin = SKAction.moveTo(y: 0, duration: drtn!)
         for b in allBlocks {
             if !(b is Equal) { b.changeShape(shapeState: .have,fillColor: clr.shape) }
             b.run(moveOrigin)
             b.ftrPoint.y = 0
         }
         
-        stnry.run(SKAction.sequence([SKAction.wait(forDuration: 0.48),
-                                     SKAction.run { stnry.resetBothBtns()}]))
-        for btn in stnry.bothBtns {
-            btn.run(SKAction.moveTo(y: -fs.h40, duration: 0.24))
+        bthbtn.run(SKAction.sequence([SKAction.wait(forDuration: drtn!),
+                                     SKAction.run { bthbtn.resetBothBtns()}]))
+        for btn in bthbtn.bothBtns {
+            btn.run(SKAction.moveTo(y: -fs.h40, duration: drtn!))
         }
     }
     
     fileprivate func leave() {
         for cb in choices { cb.removeFromParent() }
-        
+        let moveOrigin = SKAction.moveTo(y: 0, duration: drtn!)
         for b in allBlocks {
             if !(b is Equal) { b.changeShape(shapeState: .have,fillColor: clr.shape)}
             b.run(moveOrigin)
@@ -219,8 +218,8 @@ class Choice: Operation {
         }
         
         // Bothボタンを表示
-        for btn in stnry.bothBtns {
-            btn.run(SKAction.moveTo(y: -fs.h40, duration: 0.24))
+        for btn in bthbtn.bothBtns {
+            btn.run(SKAction.moveTo(y: -fs.h40, duration: drtn!))
         }
     }
 }
@@ -230,41 +229,47 @@ class Multiplication: Choice {
     
     override init() {
         super.init()
-        operationLabel.text = "Multiplication"
     }
     
     convenience init(_ nb: NumBlock) {
         self.init()
         self.strokeColor = clr.chln
+        nb.shape!.strokeColor = strokeColor
+        nb.shape!.lineWidth = fs.hlw / fm.scale
+        nb.shape!.glowWidth = fs.hglw / fm.scale
         self.selects.append(nb)
         prepareChoices()
     }
     
     override func touchBegan(touch: UITouch, node: SKNode) {
+        isTouched = true
         if let nb = node.parent as? NumBlock {
             if nb.canMultiplication {
                 for cb in choices { cb.removeFromParent() }
                 selects.first!.shape!.fillColor = clr.shape
                 selects[0] = nb
+                fm.startAmination(duration: 0.36)
                 prepareChoices()
                 return
             }
         }
         
         guard let choice = node.parent as? ChoiceButton else {
+            fm.startAmination(duration: 0.24)
             leave()
             op = Trans()
-            operationLabel.text = op.operation
+            
             op.touchBegan(touch: touch, node: node)
             return
         }
         
         if choice.isCorrect {
+            fm.startAmination(duration: 0.24)
             ansewredCorrect(choice: choice)
-            
-            op = Animation(Trans(), duration: 0.5)
+            op = Trans()
         } else {
             choice.becomeThin()
+            top.penalty()
         }
     }
     
@@ -398,15 +403,22 @@ class Multiplication: Choice {
     
     final override func changeFormula() {
         guard let selected = self.selects.first else { return }
+        selected.getMultiAnswer(correct: correct)
+        selected.isChangeContent = true
         
-        let fadeout = SKAction.fadeOut(withDuration: 0.4)
-        let changeLabel = SKAction.run { selected.getMultiAnswer(correct: self.correct) }
-        let fadeIn = SKAction.fadeIn(withDuration: 0.1)
-        selected.run(SKAction.sequence([fadeout, changeLabel, fadeIn]))
+        fm.startAmination(duration: 0.24)
+        fm.run(SKAction.sequence([SKAction.wait(forDuration: 0.24),
+                                  SKAction.run { fm.startAmination(duration: 0.12); fm.resetBlocks() }]))
+        
+    }
+    
+    final override func leave() {
+        super.leave()
+        self.selects.first!.shape!.lineWidth = 0
     }
     
     override func touchMoved(touch: UITouch, node: SKNode) { }
-    override func touchEnded(touch: UITouch, node: SKNode) { }
+    override func touchEnded(touch: UITouch, node: SKNode) { isTouched = false }
     override func update(_ currentTime: TimeInterval) { }
 }
 
@@ -424,13 +436,17 @@ class Addition: Choice {
         self.init()
         self.strokeColor = clr.chadd
         self.collectID = collectID
-        cb.shape!.fillColor = clr.slctd
+        cb.shape!.strokeColor = strokeColor
+        cb.shape!.lineWidth = fs.hlw / fm.scale
+        cb.shape!.glowWidth = fs.hglw / fm.scale
         selects.append(cb)
     }
     
     func reselect(collectID: String, cb: CollectableBlock) {
         for cb in choices { cb.removeFromParent() }
+        choices = []
         
+        let moveOrigin = SKAction.moveTo(y: 0, duration: 0.36)
         for b in allBlocks {
             if !(b is Equal) { b.changeShape(shapeState: .have,fillColor: clr.shape)}
             b.run(moveOrigin)
@@ -438,23 +454,30 @@ class Addition: Choice {
         }
         
         self.collectID = collectID
-        cb.shape!.fillColor = clr.slctd
+        cb.shape!.fillColor = clr.shape
         selects = [cb]
-        choices = []
         unionShape?.removeFromParent()
     }
     
-    override func touchBegan(touch: UITouch, node: SKNode) {
+    override func touchBegan(touch: UITouch, node: SKNode) { isTouched = true }
+    override func touchMoved(touch: UITouch, node: SKNode) { }
+    override func touchEnded(touch: UITouch, node: SKNode) {
+        isTouched = false
         if let cb = node.parent as? CollectableBlock {
+            guard cb.name != selects.first!.name else { return }
             if !cb.canMultiplication {
                 if let cid = cb.checkAndSetCollectID() {
                     if cid == collectID {
                         if !selects.contains(where: { e in return e.name == cb.name }) {
                             selects.append(cb)
+                            fm.startAmination(duration: 0.48)
+                            unionShape?.removeFromParent()
+                            for cb in choices { cb.removeFromParent() }
                             prepareChoices()
                             return
                         }
                     } else {
+                        fm.startAmination(duration: 0.48)
                         reselect(collectID: cid, cb: cb)
                         return
                     }
@@ -464,25 +487,33 @@ class Addition: Choice {
         
         if let choice = node.parent as? ChoiceButton {
             if choice.isCorrect {
+                fm.startAmination(duration: 0.48)
                 ansewredCorrect(choice: choice)
-                op = Animation(Trans(), duration: 0.5)
+                op = Trans()
             } else {
                 choice.becomeThin()
+                top.penalty()
             }
             return
         }
-        
+        fm.startAmination(duration: 0.48)
         leave()
         op = Trans()
-        op.touchBegan(touch: touch, node: node)
         return
     }
-    override func touchMoved(touch: UITouch, node: SKNode) { }
-    override func touchEnded(touch: UITouch, node: SKNode) { }
     override func update(_ currentTime: TimeInterval) { }
     
     final override func prepareFormula() {
-        super.prepareFormula()
+        let moveUp = SKAction.moveTo(y: fs.splitBase, duration: 0.36)
+        for b in allBlocks {
+            b.ss = .none
+            b.changeShape(fillColor: clr.shape)
+            
+            if b.level == 0 {
+                b.run(moveUp)
+                b.ftrPoint.y = fs.splitBase
+            }
+        }
         
         var tw = -fs.space
         for s in selects {
@@ -491,7 +522,9 @@ class Addition: Choice {
         }
         
         unionShape = SKShapeNode(rectOf: CGSize(width: tw, height: fs.bsz), cornerRadius: fs.cr)
-        unionShape!.lineWidth = 0
+        unionShape!.strokeColor = strokeColor
+        unionShape!.lineWidth = fs.hlw / fm.scale
+        unionShape!.glowWidth = fs.hglw / fm.scale
         unionShape!.fillColor = clr.shape
         unionShape!.position = CGPoint(x: targetX, y: selects.first!.absPoint.y)
         fm.addChild(unionShape!)
@@ -608,54 +641,76 @@ class Addition: Choice {
         var leftEndX: CGFloat = 10000
         for b in selects {
             tw += b.width + fs.space
-            if b.ftrPoint.x - b.width * 0.5 < leftEndX { leftEndX = b.ftrPoint.x - b.width * 0.5 }
+            if b.ftrAbsPoint.x - b.width * 0.5 < leftEndX { leftEndX = b.ftrAbsPoint.x - b.width * 0.5 }
         }
         return leftEndX - fs.space + tw * 0.5
     }
     
     final override func leave() {
         super.leave()
-        for s in selects { s.shape!.isHidden = false }
         unionShape?.removeFromParent()
     }
     
     final override func changeFormula() {
         
-        // isFirst = true を残すブロックにする
         var leave: NumBlock?
-        for s in selects { if s.isFirst { leave = s }}
-        if leave == nil { leave = selects.first! }
-        guard let l = leave else { return }
-        
-        // 残すブロックの処理
-        let fadeOut = SKAction.fadeOut(withDuration: 0.4)
-        let changeLabel = SKAction.run {
-            l.labels.ns[0] = (self.correct, l.labels.ns.first!.nl)
-            l.isChangeContent = true
+        if correct.mole != 0 {
+            // isFirst = true を残すブロックにする
+            for s in selects { if s.isFirst { leave = s }}
+            if leave == nil { leave = selects.first! }
         }
-        let fadeIn = SKAction.fadeIn(withDuration: 0.1)
-        l.run(SKAction.sequence([fadeOut, changeLabel, fadeIn]))
         
-        // 消すブロックの処理
-        let fadeOutAndRemove = SKAction.sequence([fadeOut,
+        let fadeOut = SKAction.fadeOut(withDuration: 0.7 * drtn!)
+        let fadeIn = SKAction.fadeIn(withDuration: 0.3 * drtn!)
+        let fadeOutAndRemove = SKAction.sequence([SKAction.moveTo(y: 0, duration: 0.7 * drtn!),
+                                                  fadeOut,
                                                   SKAction.removeFromParent()])
-        for s in selects {
-            if s != l {
-                s.run(fadeOutAndRemove)
-                allBlocks.remove(at: allBlocks.index(of: s)!)
-            }
-        }
         
-        if let p = l.parent as? Parnt {
+        if let l = leave {
+            // 残すブロックの処理
+            let changeLabel = SKAction.run {
+                l.labels.ns[0] = (self.correct, l.labels.ns.first!.nl)
+                l.isChangeContent = true
+            }
+            l.run(SKAction.sequence([fadeOut, changeLabel, fadeIn]))
+            
+            // 消すブロックの処理
             for s in selects {
-                if s != l { p.childBlocks.remove(at: p.childBlocks.index(of: s)!)}
+                if s != l {
+                    s.run(fadeOutAndRemove)
+                    allBlocks.remove(at: allBlocks.index(of: s)!)
+                }
+            }
+            
+            if let p = l.parent as? Parnt {
+                for s in selects {
+                    if s != l { p.childBlocks.remove(at: p.childBlocks.index(of: s)!)}
+                }
+            } else {
+                for s in selects {
+                    if s != l { firstLayblocks.remove(at: firstLayblocks.index(of: s)!)}
+                }
             }
         } else {
             for s in selects {
-                if s != l { firstLayblocks.remove(at: firstLayblocks.index(of: s)!)}
+                s.run(fadeOutAndRemove)
+                allBlocks.remove(at: allBlocks.index(of: s)!)
+            }
+            
+            if let p = selects.first!.parent as? Parnt {
+                for s in selects { p.childBlocks.remove(at: p.childBlocks.index(of: s)!) }
+            } else {
+                for s in selects { firstLayblocks.remove(at: firstLayblocks.index(of: s)!) }
             }
         }
-        unionShape!.run(SKAction.sequence([SKAction.fadeOut(withDuration: 0.4),
-                                           SKAction.removeFromParent()]))
+        unionShape!.run(fadeOutAndRemove)
+        fm.setIsFirstForAllBlocks()
+        
+        fm.run(SKAction.sequence([SKAction.wait(forDuration: drtn!),
+                                  SKAction.run {
+                                    fm.startAmination(duration: 0.24)
+                                    fm.resetBlocks()
+                                    if section != 1 { bthbtn.resetBothBtns() }
+            }]))
     }
 }

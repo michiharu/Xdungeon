@@ -10,9 +10,25 @@ import Foundation
 import CoreGraphics
 
 struct Util {
-    func randNum(seed: Int) -> Int { return Int(arc4random_uniform(UInt32(seed)) + 1) }
+    func randNum(_ max: Int, avoid: Set<Int>) -> Int {
+        guard avoid.max()! < max else { fatalError("maxより大きな値がavoid配列に含まれています。")}
+        let rand = randNum(max - avoid.count)
+        let avoidArray = Array(avoid).sorted()
+        for (i, avoid) in avoidArray.enumerated() {
+            if rand < avoid {
+                return rand + i
+            }
+        }
+        return rand + avoid.count
+    }
+    
+    func randNum(_ max: Int) -> Int { return Int(arc4random_uniform(UInt32(max)) + 1) }
     
     func randBool() -> Bool { return Int(arc4random_uniform(2)) == 0 ? true : false }
+    
+    func randBool(_ per: Int) -> Bool { return Int(arc4random_uniform(100)) < per ? true : false }
+    
+    func randP1M1() -> Int { return randBool() ? 1 : -1 }
     
     func reduce(m: Int, d: Int) ->(m: Int, d: Int){
         
@@ -26,6 +42,36 @@ struct Util {
         }
         let r = gcd(m, d)
         return (m/r, d/r)
+    }
+    
+    let digit: Int = 1000
+    
+    func getKeyForHighScore() -> String {
+        return "HighScore"
+    }
+    
+    func getKeyStageComplete() -> String {
+        return "StageComplete"
+    }
+    
+    func getKeyStageStar(_ section: Int,_ stage: Int,_  mode: Mode) -> String {
+        return getTagNum(section, stage).description + mode.rawValue
+    }
+    
+    func getKeyStageCanPlay(_ section: Int,_ stage: Int) -> String {
+        return getTagNum(section, stage).description + "CanPlay"
+    }
+    
+    func getKeyStagePlayEver(_ section: Int,_ stage: Int) -> String {
+        return getTagNum(section, stage).description + "Ever"
+    }
+    
+    func getTagNum(_ section: Int,_ stage: Int) -> Int {
+        return section * digit + stage
+    }
+    
+    func getNumsFromTag(tag: Int) -> (section: Int, stage: Int) {
+        return (section: tag / digit, stage: tag % digit)
     }
 }
 
@@ -120,4 +166,18 @@ public func *= (left: inout CGPoint, right: CGFloat) {
 
 public func /= (left: inout CGPoint, right: CGFloat) {
     left = left / right
+}
+extension Array {
+    mutating func shuffle() {
+        for i in 0..<self.count {
+            let j = Int(arc4random_uniform(UInt32(self.indices.last!)))
+            if i != j { self.swapAt(i, j) }
+        }
+    }
+    
+    var shuffled: Array {
+        var copied = Array<Element>(self)
+        copied.shuffle()
+        return copied
+    }
 }

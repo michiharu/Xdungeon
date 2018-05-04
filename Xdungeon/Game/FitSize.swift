@@ -32,11 +32,12 @@ struct FitSize {
     let minSc: CGFloat   // mini scale
     let lncrv: CGFloat   // line curve
     let bothsr: CGFloat
+    let tbh:   CGFloat   // time bar height
     
     init(w: CGFloat, h: CGFloat) {
         height = h
         width  = w
-        splitBase = h * 0.22
+        splitBase = h * 0.18
         h40    = h * 0.40
         
         bsz   = h * 0.240
@@ -46,15 +47,16 @@ struct FitSize {
         barh  = h * 0.008
         barc  = h * 0.002
         space = h * 0.020
-        cr    = h * 0.040
+        cr    = h * 0.030
         brsz  = h * 0.140
-        hlw   = h * 0.005
+        hlw   = h * 0.002
         arc   = h * 0.080
         glw   = h * 0.010
-        hglw  = h * 0.006
+        hglw  = h * 0.004
         minbw = h * 0.180
         minSc = 0.5
-        lncrv = h * 0.120
+        lncrv = h * 0.080
         bothsr = h * 0.25
+        tbh = h * 0.03
     }
 }

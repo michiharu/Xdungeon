@@ -16,15 +16,25 @@
 		945580292086D8CA008585A7 /* Both.swift in Sources */ = {isa = PBXBuildFile; fileRef = 945580282086D8CA008585A7 /* Both.swift */; };
 		9455802B2086D9DC008585A7 /* Operation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9455802A2086D9DC008585A7 /* Operation.swift */; };
 		9455802D208700CE008585A7 /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9455802C208700CE008585A7 /* Util.swift */; };
-		9455802F2087234C008585A7 /* Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9455802E2087234C008585A7 /* Animation.swift */; };
-		9455803120877009008585A7 /* Duration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9455803020877009008585A7 /* Duration.swift */; };
 		945723832088F789000989DE /* Choice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 945723822088F789000989DE /* Choice.swift */; };
-		9457238520891E61000989DE /* Stationary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9457238420891E61000989DE /* Stationary.swift */; };
+		9457238520891E61000989DE /* ChallengeTopBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9457238420891E61000989DE /* ChallengeTopBar.swift */; };
+		949448742091B7B2001685DD /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 949448732091B7B2001685DD /* HomeViewController.swift */; };
+		949448762091BA00001685DD /* StagesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 949448752091BA00001685DD /* StagesViewController.swift */; };
+		949448782091C948001685DD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 949448772091C948001685DD /* Assets.xcassets */; };
+		9494487C2091F9DB001685DD /* SelectModeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9494487B2091F9DB001685DD /* SelectModeViewController.swift */; };
+		9494487E2092CEF2001685DD /* StageCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9494487D2092CEF2001685DD /* StageCollectionViewCell.swift */; };
+		9494488020930064001685DD /* Mode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9494487F20930064001685DD /* Mode.swift */; };
+		9494488420956EF1001685DD /* ModeCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9494488320956EF1001685DD /* ModeCollectionViewCell.swift */; };
+		949448862095743F001685DD /* StageCollectionReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 949448852095743F001685DD /* StageCollectionReusableView.swift */; };
+		9494488C2096C405001685DD /* Questions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9494488B2096C405001685DD /* Questions.swift */; };
+		94ADBE14209ADE0F00EE70AA /* StageGameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94ADBE13209ADE0F00EE70AA /* StageGameScene.swift */; };
+		94ADBE18209ADE6300EE70AA /* StageTopBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94ADBE17209ADE6300EE70AA /* StageTopBar.swift */; };
+		94ADBE1A209AE5FA00EE70AA /* BothButtonController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94ADBE19209AE5FA00EE70AA /* BothButtonController.swift */; };
+		94ADBE1C209AE71200EE70AA /* TopBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94ADBE1B209AE71200EE70AA /* TopBar.swift */; };
+		94ADBE1E209AEB2200EE70AA /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94ADBE1D209AEB2200EE70AA /* GameViewController.swift */; };
 		94FF447D207446B100EF81DB /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94FF447C207446B100EF81DB /* AppDelegate.swift */; };
-		94FF4483207446B100EF81DB /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94FF4482207446B100EF81DB /* GameScene.swift */; };
-		94FF4485207446B100EF81DB /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94FF4484207446B100EF81DB /* GameViewController.swift */; };
+		94FF4483207446B100EF81DB /* ChallengeGameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94FF4482207446B100EF81DB /* ChallengeGameScene.swift */; };
 		94FF4488207446B100EF81DB /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 94FF4486207446B100EF81DB /* Main.storyboard */; };
-		94FF448A207446B200EF81DB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 94FF4489207446B200EF81DB /* Assets.xcassets */; };
 		94FF448D207446B200EF81DB /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 94FF448B207446B200EF81DB /* LaunchScreen.storyboard */; };
 		94FF44BB20782C3400EF81DB /* Block.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94FF44BA20782C3400EF81DB /* Block.swift */; };
 /* End PBXBuildFile section */
@@ -39,16 +49,26 @@
 		945580282086D8CA008585A7 /* Both.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Both.swift; sourceTree = "<group>"; };
 		9455802A2086D9DC008585A7 /* Operation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Operation.swift; sourceTree = "<group>"; };
 		9455802C208700CE008585A7 /* Util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
-		9455802E2087234C008585A7 /* Animation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Animation.swift; sourceTree = "<group>"; };
-		9455803020877009008585A7 /* Duration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Duration.swift; sourceTree = "<group>"; };
 		945723822088F789000989DE /* Choice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Choice.swift; sourceTree = "<group>"; };
-		9457238420891E61000989DE /* Stationary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stationary.swift; sourceTree = "<group>"; };
+		9457238420891E61000989DE /* ChallengeTopBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeTopBar.swift; sourceTree = "<group>"; };
+		949448732091B7B2001685DD /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
+		949448752091BA00001685DD /* StagesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StagesViewController.swift; sourceTree = "<group>"; };
+		949448772091C948001685DD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		9494487B2091F9DB001685DD /* SelectModeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectModeViewController.swift; sourceTree = "<group>"; };
+		9494487D2092CEF2001685DD /* StageCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StageCollectionViewCell.swift; sourceTree = "<group>"; };
+		9494487F20930064001685DD /* Mode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mode.swift; sourceTree = "<group>"; };
+		9494488320956EF1001685DD /* ModeCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModeCollectionViewCell.swift; sourceTree = "<group>"; };
+		949448852095743F001685DD /* StageCollectionReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StageCollectionReusableView.swift; sourceTree = "<group>"; };
+		9494488B2096C405001685DD /* Questions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Questions.swift; sourceTree = "<group>"; };
+		94ADBE13209ADE0F00EE70AA /* StageGameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StageGameScene.swift; sourceTree = "<group>"; };
+		94ADBE17209ADE6300EE70AA /* StageTopBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StageTopBar.swift; sourceTree = "<group>"; };
+		94ADBE19209AE5FA00EE70AA /* BothButtonController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BothButtonController.swift; sourceTree = "<group>"; };
+		94ADBE1B209AE71200EE70AA /* TopBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopBar.swift; sourceTree = "<group>"; };
+		94ADBE1D209AEB2200EE70AA /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		94FF4479207446B100EF81DB /* Xdungeon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Xdungeon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		94FF447C207446B100EF81DB /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		94FF4482207446B100EF81DB /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
-		94FF4484207446B100EF81DB /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
+		94FF4482207446B100EF81DB /* ChallengeGameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeGameScene.swift; sourceTree = "<group>"; };
 		94FF4487207446B100EF81DB /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		94FF4489207446B200EF81DB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		94FF448C207446B200EF81DB /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		94FF448E207446B200EF81DB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		94FF44BA20782C3400EF81DB /* Block.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Block.swift; sourceTree = "<group>"; };
@@ -73,9 +93,65 @@
 				945580202086D7AD008585A7 /* Trans.swift */,
 				945580222086D81B008585A7 /* Deployment.swift */,
 				945580282086D8CA008585A7 /* Both.swift */,
-				9455802E2087234C008585A7 /* Animation.swift */,
 			);
 			path = operation;
+			sourceTree = "<group>";
+		};
+		949448722091A786001685DD /* Game */ = {
+			isa = PBXGroup;
+			children = (
+				94ADBE15209ADE1700EE70AA /* Scene */,
+				94ADBE16209ADE3C00EE70AA /* TopBar */,
+				9455801D2086D739008585A7 /* Formula.swift */,
+				94ADBE19209AE5FA00EE70AA /* BothButtonController.swift */,
+				94FF44BA20782C3400EF81DB /* Block.swift */,
+				945580152082F4B6008585A7 /* Button.swift */,
+				9455802C208700CE008585A7 /* Util.swift */,
+				945580192084239E008585A7 /* FitSize.swift */,
+				9455801B2084267E008585A7 /* Color.swift */,
+				9494488B2096C405001685DD /* Questions.swift */,
+				9455801F2086D79B008585A7 /* operation */,
+			);
+			path = Game;
+			sourceTree = "<group>";
+		};
+		9494488720957453001685DD /* Stages */ = {
+			isa = PBXGroup;
+			children = (
+				949448752091BA00001685DD /* StagesViewController.swift */,
+				949448852095743F001685DD /* StageCollectionReusableView.swift */,
+				9494487D2092CEF2001685DD /* StageCollectionViewCell.swift */,
+			);
+			path = Stages;
+			sourceTree = "<group>";
+		};
+		94944888209581D7001685DD /* SelectMode */ = {
+			isa = PBXGroup;
+			children = (
+				9494487F20930064001685DD /* Mode.swift */,
+				9494487B2091F9DB001685DD /* SelectModeViewController.swift */,
+				9494488320956EF1001685DD /* ModeCollectionViewCell.swift */,
+			);
+			path = SelectMode;
+			sourceTree = "<group>";
+		};
+		94ADBE15209ADE1700EE70AA /* Scene */ = {
+			isa = PBXGroup;
+			children = (
+				94FF4482207446B100EF81DB /* ChallengeGameScene.swift */,
+				94ADBE13209ADE0F00EE70AA /* StageGameScene.swift */,
+			);
+			path = Scene;
+			sourceTree = "<group>";
+		};
+		94ADBE16209ADE3C00EE70AA /* TopBar */ = {
+			isa = PBXGroup;
+			children = (
+				94ADBE1B209AE71200EE70AA /* TopBar.swift */,
+				9457238420891E61000989DE /* ChallengeTopBar.swift */,
+				94ADBE17209ADE6300EE70AA /* StageTopBar.swift */,
+			);
+			path = TopBar;
 			sourceTree = "<group>";
 		};
 		94FF4470207446B100EF81DB = {
@@ -97,21 +173,15 @@
 		94FF447B207446B100EF81DB /* Xdungeon */ = {
 			isa = PBXGroup;
 			children = (
-				9455801F2086D79B008585A7 /* operation */,
+				949448722091A786001685DD /* Game */,
 				94FF447C207446B100EF81DB /* AppDelegate.swift */,
-				94FF4482207446B100EF81DB /* GameScene.swift */,
-				9455801D2086D739008585A7 /* Formula.swift */,
-				9457238420891E61000989DE /* Stationary.swift */,
-				94FF44BA20782C3400EF81DB /* Block.swift */,
-				945580152082F4B6008585A7 /* Button.swift */,
-				9455802C208700CE008585A7 /* Util.swift */,
-				945580192084239E008585A7 /* FitSize.swift */,
-				9455803020877009008585A7 /* Duration.swift */,
-				9455801B2084267E008585A7 /* Color.swift */,
-				94FF4484207446B100EF81DB /* GameViewController.swift */,
-				94FF4486207446B100EF81DB /* Main.storyboard */,
-				94FF4489207446B200EF81DB /* Assets.xcassets */,
 				94FF448B207446B200EF81DB /* LaunchScreen.storyboard */,
+				94FF4486207446B100EF81DB /* Main.storyboard */,
+				949448732091B7B2001685DD /* HomeViewController.swift */,
+				9494488720957453001685DD /* Stages */,
+				94944888209581D7001685DD /* SelectMode */,
+				94ADBE1D209AEB2200EE70AA /* GameViewController.swift */,
+				949448772091C948001685DD /* Assets.xcassets */,
 				94FF448E207446B200EF81DB /* Info.plist */,
 			);
 			path = Xdungeon;
@@ -176,7 +246,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				94FF4488207446B100EF81DB /* Main.storyboard in Resources */,
-				94FF448A207446B200EF81DB /* Assets.xcassets in Resources */,
+				949448782091C948001685DD /* Assets.xcassets in Resources */,
 				94FF448D207446B200EF81DB /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -188,23 +258,33 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				94FF4483207446B100EF81DB /* GameScene.swift in Sources */,
+				94ADBE1C209AE71200EE70AA /* TopBar.swift in Sources */,
+				94FF4483207446B100EF81DB /* ChallengeGameScene.swift in Sources */,
 				9455802B2086D9DC008585A7 /* Operation.swift in Sources */,
 				94FF44BB20782C3400EF81DB /* Block.swift in Sources */,
+				949448762091BA00001685DD /* StagesViewController.swift in Sources */,
+				9494488420956EF1001685DD /* ModeCollectionViewCell.swift in Sources */,
+				94ADBE1A209AE5FA00EE70AA /* BothButtonController.swift in Sources */,
 				945580292086D8CA008585A7 /* Both.swift in Sources */,
 				9455801E2086D739008585A7 /* Formula.swift in Sources */,
+				94ADBE1E209AEB2200EE70AA /* GameViewController.swift in Sources */,
+				9494488020930064001685DD /* Mode.swift in Sources */,
 				9455802D208700CE008585A7 /* Util.swift in Sources */,
+				949448742091B7B2001685DD /* HomeViewController.swift in Sources */,
 				945580212086D7AD008585A7 /* Trans.swift in Sources */,
 				945580232086D81B008585A7 /* Deployment.swift in Sources */,
+				9494488C2096C405001685DD /* Questions.swift in Sources */,
+				9494487E2092CEF2001685DD /* StageCollectionViewCell.swift in Sources */,
+				94ADBE14209ADE0F00EE70AA /* StageGameScene.swift in Sources */,
 				945580162082F4B6008585A7 /* Button.swift in Sources */,
-				94FF4485207446B100EF81DB /* GameViewController.swift in Sources */,
-				9457238520891E61000989DE /* Stationary.swift in Sources */,
+				949448862095743F001685DD /* StageCollectionReusableView.swift in Sources */,
+				9494487C2091F9DB001685DD /* SelectModeViewController.swift in Sources */,
+				9457238520891E61000989DE /* ChallengeTopBar.swift in Sources */,
 				945723832088F789000989DE /* Choice.swift in Sources */,
-				9455802F2087234C008585A7 /* Animation.swift in Sources */,
-				9455803120877009008585A7 /* Duration.swift in Sources */,
 				9455801A2084239E008585A7 /* FitSize.swift in Sources */,
 				94FF447D207446B100EF81DB /* AppDelegate.swift in Sources */,
 				9455801C2084267E008585A7 /* Color.swift in Sources */,
+				94ADBE18209ADE6300EE70AA /* StageTopBar.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -352,7 +432,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = T8Z2Y8U8RC;
 				INFOPLIST_FILE = Xdungeon/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -372,7 +452,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = T8Z2Y8U8RC;
 				INFOPLIST_FILE = Xdungeon/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

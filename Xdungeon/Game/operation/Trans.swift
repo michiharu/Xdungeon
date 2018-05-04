@@ -16,35 +16,33 @@ class Trans: Operation {
     private var tPoint: CGPoint? // touch point
     private var isTransed = false
     
-    private let drtin: TimeInterval = 0.24
-    
-    override init() {
-        super.init()
-        operationLabel.text = "Trans"
-    }
-    
     private func leave() {
-        for btn in stnry.bothBtns {
-            btn.run(SKAction.moveTo(y: -fs.h40 * 2, duration: drtin))
+        fm.startAmination(duration: 0.36)
+        for btn in bthbtn.bothBtns {
+            btn.run(SKAction.moveTo(y: -fs.h40 * 2, duration: drtn!))
         }
     }
     
     override func touchBegan(touch: UITouch, node: SKNode) {
+        isTouched = true
         if let block = node.parent as? Block {
             guard !(block is Equal) else { return }
             
             if let multi = block as? Multi {
                 if is1(multi) { deployForOne(multi); return }
                 if multi.canMultiplication {
+                    guard !fm.isAminated else { return }
+                    fm.startAmination(duration: 0.36)
                     leave()
-                    op = Animation(Multiplication(multi), duration: 0.36)
+                    op = Multiplication(multi)
                     return
                 }
-                
+                guard !fm.isAminated else { return }
+                fm.startAmination(duration: 0)
                 leave()
-                op = Deployment(multi.parent as! Parnt)
+                op = Deployment(parent: multi.parent as! Parnt)
                 op.touchBegan(touch: touch, node: node)
-                operationLabel.text = op.operation
+                
                 return
             }
             
@@ -52,13 +50,13 @@ class Trans: Operation {
             tPoint = touch.location(in: fm)
             block.isTouched = true
             block.zPosition = block.level + BRING_TO_FRONT
+            print("touch")
             setChangeBlock(tb: block)
             isTransed = false
             return
         }
         if let btn = node.parent as? BothButton {
             op = Both(btn: btn)
-            operationLabel.text = op.operation
             return
         }
     }
@@ -91,10 +89,12 @@ class Trans: Operation {
     }
     
     override func touchEnded(touch: UITouch, node: SKNode) {
+        isTouched = false
         guard let tb = touchBlock else { return }
         tb.isTouched = false
         tb.zPosition = tb.level
-        tb.run(SKAction.move(to: CGPoint(x: tb.ftrPoint.x, y: 0), duration: drtin))
+        fm.startAmination(duration: 0.24)
+        tb.run(SKAction.move(to: CGPoint(x: tb.ftrPoint.x, y: 0), duration: drtn!))
         touchBlock = nil
         
 
@@ -102,25 +102,24 @@ class Trans: Operation {
             guard let nb = tb as? NumBlock else { return }
             
             if nb.canMultiplication {
+                fm.startAmination(duration: 0.36)
                 leave()
-                op = Animation(Multiplication(nb), duration: 0.36)
+                op = Multiplication(nb)
                 return
             }
+            
             if let clct = nb as? CollectableBlock {
                 if let cid = clct.checkAndSetCollectID() {
+                    fm.startAmination(duration: 0.36)
                     leave()
                     op = Addition(collectID: cid, cb: clct)
-                    operationLabel.text = op.operation
                     return
                 }
             }
         }
     }
-    override func update(_ currentTime: TimeInterval) {
-        if isAdjustAllBlocks {
-            stnry.resetBothBtns()
-        }
-    }
+    
+    override func update(_ currentTime: TimeInterval) { }
     
     private func is1(_ m: Multi) -> Bool {
         let nlcount = m.labels.ns.count
@@ -174,9 +173,13 @@ class Trans: Operation {
         let mIndex = allBlocks.index(of: p.cm)!
         allBlocks.remove(at: mIndex)
         fm.setMaxLevel()
+        
+        fm.startAmination(duration: 0.12)
+        fm.resetBlocks()
     }
     
     private func setChangeBlock(tb: Block) {
+        
         nextBlock = nil
         beforeBlock = nil
         guard !(tb is Multi) else { return } //tb is not multi
@@ -190,7 +193,7 @@ class Trans: Operation {
                 beforeBlock = p.childBlocks[index - 1]
             }
         } else {
-            if tb == firstLayblocks.first! { nextBlock = firstLayblocks[1] }
+            if tb == firstLayblocks.first     { nextBlock   = firstLayblocks[1]}
             else if tb == firstLayblocks.last { beforeBlock = firstLayblocks[firstLayblocks.endIndex - 2]}
             else {
                 let index = firstLayblocks.index(of: tb)!
@@ -201,7 +204,7 @@ class Trans: Operation {
     }
     
     private func moveBefore(touchBlock tb: Block, before bf: Block) {
-        
+        print("moveBefore")
         // () 内のブロックを操作する場合
         if let p = tb.parent as? Parnt {
             let index = p.childBlocks.index(of: tb)!
@@ -238,10 +241,13 @@ class Trans: Operation {
             }
         }
         setChangeBlock(tb: tb)
+        fm.startAmination(duration: 0.24)
+        fm.resetBlocks()
+        bthbtn.resetBothBtns()
     }
     
     private func moveNext(touchBlock tb: Block, next nx: Block) {
-        
+        print("moveNext")
         // () 内のブロックを操作する場合
         if let p = tb.parent as? Parnt {
             let index = p.childBlocks.index(of: tb)!
@@ -279,5 +285,8 @@ class Trans: Operation {
             }
         }
         setChangeBlock(tb: tb)
+        fm.startAmination(duration: 0.24)
+        fm.resetBlocks()
+        bthbtn.resetBothBtns()
     }
 }

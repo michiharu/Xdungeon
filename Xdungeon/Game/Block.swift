@@ -9,16 +9,27 @@
 import SpriteKit
 import GameplayKit
 
-enum Kind {
-    case P // parent
-    case X // x
-    case C // constant
-    case M // multiplier
-    case E // equal
+enum Kind: String {
+    var description: String {
+        return self.rawValue
+    }
+    case P = "P"// parent
+    case X = "X" // x
+    case C = "C" // constant
+    case M = "M"// multiplier
+    case E = "E"// equal
 }
 
-class Num {
+class Num: CustomStringConvertible {
+    var description: String {
+        let pm: String = isPlus ? "+" : "-"
+        return pm + mole.description + "/" + deno.description
+    }
+    
     var isPlus: Bool, mole: Int, deno: Int
+    var moleWithSign: Int {
+        return mole * (isPlus ? 1 : -1)
+    }
     
     init(_ isPlus: Bool,_ m: Int,_ d: Int) {
         self.isPlus = isPlus
@@ -28,6 +39,13 @@ class Num {
     
     func copy() -> Num {
         return Num(self.isPlus, self.mole, self.deno)
+    }
+    
+    func reduce() {
+        func gcd(_ a: Int, _ b: Int) -> Int { if b == 0 { return a } else { return gcd(b, a % b) } }
+        let r = gcd(mole, deno)
+        mole = mole/r
+        deno = deno/r
     }
 }
 extension Num: Equatable {
@@ -281,14 +299,8 @@ final class NumLabels {
         for n in ns { ut.slideHalfLengthOfAnchor(a: a, nodes: n.nl.all) }
     }
     
-    func addMuler(_ nb: NumBlock, duration: TimeInterval = 0, num: Num) -> [SKNode] {
-        
+    func addMuler(_ nb: NumBlock, num: Num) -> [SKNode] {
         let nl = NumLabel(isX: ut.checkX(nb), isMuler: true)
-        let wait = SKAction.sequence([SKAction.fadeOut(withDuration: 0),
-                                      SKAction.wait(forDuration: duration),
-                                      SKAction.fadeIn(withDuration: 0)])
-        for node in nl.all { node.run(wait) }
-        
         ns.append((num.copy(), nl))
         return nl.all
     }
@@ -369,6 +381,8 @@ enum ShapeState {
 
 class Block: SKNode {
     
+    
+    
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -427,27 +441,29 @@ class Block: SKNode {
             emphasizeLastMuler()
         case .none:
             shape?.fillColor = .clear
+            shape?.lineWidth = 0
         }
     }
     
     func resizeShape(fillColor: SKColor = SKColor.clear) {
         if let s = shape {
             s.isHidden = false
+            s.lineWidth = 0
             let scale = width / s.frame.width
             s.removeAllActions()
-            s.run(SKAction.sequence([SKAction.scaleX(to: scale, duration: 0.15),
+            s.run(SKAction.sequence([SKAction.scaleX(to: scale, duration: drtn!),
                                      SKAction.removeFromParent()]))
         }
-        
         
         let newShape = SKShapeNode(rectOf: CGSize(width: width, height: fs.bsz), cornerRadius: fs.cr)
         newShape.lineWidth = 0
         newShape.fillColor = fillColor
         newShape.zPosition = level
-        newShape.run(SKAction.sequence([SKAction.fadeOut(withDuration: 0),
-                                        SKAction.wait(forDuration: 0.15),
-                                        SKAction.fadeIn(withDuration: 0)]))
         addChild(newShape)
+        newShape.run(SKAction.sequence([SKAction.fadeOut(withDuration: 0),
+                                        SKAction.wait(forDuration: drtn!),
+                                        SKAction.fadeIn(withDuration: 0)]))
+        
         shape = newShape
     }
     
@@ -508,11 +524,10 @@ class NumBlock: Block {
         isChangeContent = true
     }
     
-    func addMuler(ss: ShapeState, duration: TimeInterval = 0, num: Num) {
-        addChildren(labels.addMuler(self, duration: duration, num: num))
-        let later = SKAction.run { self.isChangeContent = true; self.ss = ss }
-        let wait  = SKAction.wait(forDuration: duration)
-        run(SKAction.sequence([wait, later]))
+    func addMuler(ss: ShapeState, num: Num) {
+        addChildren(labels.addMuler(self, num: num))
+        self.isChangeContent = true
+        self.ss = ss
     }
     
     final override func emphasizeLastMuler() {
@@ -540,13 +555,12 @@ class NumBlock: Block {
         shape = newShape
     }
     
-    func removeLastMuler(duration: TimeInterval) {
+    func removeLastMuler() {
         for node in labels.ns.last!.nl.all { node.removeFromParent() }
         labels.ns.removeLast()
         shape!.position.x = 0
         ss = .have
-        run(SKAction.sequence([SKAction.wait(forDuration: duration) ,
-                               SKAction.run { self.isChangeContent = true }]))
+        isChangeContent = true
     }
     
     final func getMultiAnswer(correct: Num) {
@@ -565,6 +579,15 @@ class CollectableBlock: NumBlock {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override var description: String {
+        var str: String = ""
+        for n in labels.ns.reversed() {
+            str += n.num.description
+        }
+        str += kind.rawValue + level.description
+        return str
+    }
+    
     var kind: Kind!
     var collectID: String?
     
@@ -572,9 +595,9 @@ class CollectableBlock: NumBlock {
         super.init()
     }
     
-    convenience init(kind: Kind, parentID: String, isFirst: Bool, level: CGFloat, num: Num) {
+    convenience init(kind: Kind, parentID: String, level: CGFloat, num: Num) {
         self.init()
-        self.kind = kind; self.parentID = parentID; self.isFirst = isFirst; self.level = level
+        self.kind = kind; self.parentID = parentID; self.level = level
         
         labels = NumLabels(isX: kind == .X ? true : false, num: num)
         addChildren(labels.ns.first!.nl.all)
@@ -638,9 +661,18 @@ class Multi: NumBlock {
         super.init()
     }
     
-    convenience init(parentID: String, isFirst: Bool, level: CGFloat, num: Num) {
+    override var description: String {
+        var str: String = ""
+        for n in labels.ns.reversed() {
+            str += " " + n.num.description
+        }
+        str += "M" + level.description
+        return str
+    }
+    
+    convenience init(parentID: String, level: CGFloat, num: Num) {
         self.init()
-        self.parentID = parentID; self.isFirst = isFirst; self.level = level
+        self.parentID = parentID; self.level = level
         
         labels = NumLabels(isX: false, num: num)
         addChildren(labels.ns.first!.nl.all)
@@ -664,6 +696,8 @@ class Parnt: Block {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    override var description: String { return "P" + level.description }
     
     var cm: Multi! // child multi
     var childBlocks: [Block]!
@@ -715,7 +749,7 @@ class Parnt: Block {
         super.init()
     }
     
-    convenience init(parentID: String, isFirst: Bool, level: CGFloat, multi: Multi, blocks: [Block]) {
+    convenience init(parentID: String, level: CGFloat, multi: Multi, blocks: [Block]) {
         self.init()
         
         cm = multi
@@ -723,7 +757,7 @@ class Parnt: Block {
         addChild(cm)
         addChildren(childBlocks)
         
-        self.parentID = parentID; self.isFirst = isFirst; self.level = level
+        self.parentID = parentID; self.level = level
         
         l = Label()
         addChildren(l.all)
@@ -734,6 +768,15 @@ class Parnt: Block {
         cm.setIsFirst(f)
     }
     
+    func setIsFirstForAllChildren() {
+        var isFirstChild = true
+        for c in childBlocks {
+            c.setIsFirst(isFirstChild)
+            isFirstChild = false
+            if let p = c as? Parnt { p.setIsFirstForAllChildren() }
+        }
+    }
+    
     final override func reverseSign() {
         cm.reverseSign()
         cm.isChangeContent = true
@@ -741,13 +784,14 @@ class Parnt: Block {
     
     final override func setLevel(_ l: CGFloat) {
         self.level = l
-        self.cm.setLevel(l)
+        self.cm.setLevel(l + 1)
         for c in childBlocks { c.setLevel(l + 1) }
     }
     
     final override func changeContent() {
         
         isChangeContent = false
+        
         
         var tw: CGFloat = 0 // total width
         tw += cm.width + fs.space
@@ -758,22 +802,22 @@ class Parnt: Block {
         
         var a = (-tw * 0.5) // a: anchor
         cm.run(
-            SKAction.move(to: CGPoint(x: a + (cm.width * 0.5), y: cm.ftrPoint.y), duration: 0.15))
+            SKAction.move(to: CGPoint(x: a + (cm.width * 0.5), y: cm.ftrPoint.y), duration: drtn!))
         cm.ftrPoint.x = a + cm.width * 0.5
         a += cm.width + fs.space
         
-        l.br1.run(SKAction.move(to: CGPoint(x: a + l.br1.frame.width * 0.5, y: 0), duration: 0.15))
+        l.br1.run(SKAction.move(to: CGPoint(x: a + l.br1.frame.width * 0.5, y: 0), duration: drtn!))
         a += l.br1.frame.width + fs.space
         
         for c in childBlocks {
             if !c.isTouched {
-                c.run(SKAction.move(to: CGPoint(x: a + c.width * 0.5, y: 0), duration: 0.15))
+                c.run(SKAction.move(to: CGPoint(x: a + c.width * 0.5, y: 0), duration: drtn!))
             }
             c.ftrPoint.x = a + c.width * 0.5
             a += c.width + fs.space
         }
         
-        l.br2.run(SKAction.move(to: CGPoint(x: a + l.br2.frame.width * 0.5, y: 0), duration: 0.15))
+        l.br2.run(SKAction.move(to: CGPoint(x: a + l.br2.frame.width * 0.5, y: 0), duration: drtn!))
         
         width = tw
         changeShape(fillColor: clr.shape)
@@ -783,9 +827,12 @@ class Parnt: Block {
     final override func resizeShape(fillColor: SKColor = SKColor.clear) {
         if let s = shape {
             s.isHidden = false
+            s.lineWidth = 0
+            if abs(width - s.frame.width) < fs.space { return }
+            
             let scale = width / s.frame.width
             s.removeAllActions()
-            s.run(SKAction.sequence([SKAction.scaleX(to: scale, duration: 0.15),
+            s.run(SKAction.sequence([SKAction.scaleX(to: scale, duration: drtn!),
                                      SKAction.removeFromParent()]))
         }
         
@@ -794,10 +841,10 @@ class Parnt: Block {
         newShape.fillColor = clr.shape
         newShape.zPosition = level
         newShape.position.y = -fs.bsz * 0.36 - (maxLevel - level) * (fs.bsz * 0.3 + fs.space)
-        newShape.run(SKAction.sequence([SKAction.fadeOut(withDuration: 0),
-                                        SKAction.wait(forDuration: 0.15),
-                                        SKAction.fadeIn(withDuration: 0)]))
         addChild(newShape)
+        newShape.run(SKAction.sequence([SKAction.fadeOut(withDuration: 0),
+                                        SKAction.wait(forDuration: drtn!),
+                                        SKAction.fadeIn(withDuration: 0)]))
         shape = newShape
     }
     
@@ -815,8 +862,9 @@ class Parnt: Block {
     }
     
     func connectLine(index: Int) {
+        print("connectLine")
         let c = childBlocks[index]
-        if let p  = c as? Parnt  { p.cm.dcl!.isConnected = true; return }
+        if let p  = c as? Parnt  { print(p);p.cm.dcl!.isConnected = true; return }
         if let nb = c as? NumBlock { nb.dcl!.isConnected = true; return }
         fatalError()
     }
@@ -853,8 +901,8 @@ class Parnt: Block {
         }
     }
     
-    func deploy(duration: TimeInterval) -> [Block] {
-        let d4_1 = duration / 4
+    func deploy() -> [Block] {
+        let d4_1 = drtn! / 4
         let d4_2 = d4_1 * 2
         let d4_3 = d4_1 * 3
         
@@ -875,8 +923,8 @@ class Parnt: Block {
             
             copyNode.run(action)
             addChild(copyNode)
-            target.addMuler(ss: .have, duration: duration, num: cm.labels.ns.first!.num)
-            target.level = target.level - 1
+            target.addMuler(ss: .have, num: cm.labels.ns.first!.num)
+            c.setLevel(c.level - 1)
         }
         
         cm.removeFromParent()
@@ -904,14 +952,20 @@ class Parnt: Block {
     }
     
     private func makePath(isLine: Bool = true, child c: Block) -> CGMutablePath {
-        let d = abs(cm.position.x - c.position.x)
+        var bp: CGPoint = c.position
+        if c is Multi {
+            let pOfC = c.parent as! Parnt
+            bp = pOfC.position + c.position
+        }
+        
+        let d = abs(cm.position.x - bp.x)
         
         let path = CGMutablePath()
         let (mAbove, blockAbove) = (CGPoint(x: cm.position.x, y: cm.position.y + fs.arc + d * 0.5),
-                                    CGPoint(x: c .position.x, y: c .position.y + fs.arc + d * 0.5))
+                                    CGPoint(x: bp.x, y: bp.y + fs.arc + d * 0.5))
         
         let startCurvePoint = CGPoint(x: cm.position.x, y: cm.position.y + fs.bsz * 0.5)
-        let goalCurvePoint  = CGPoint(x: c .position.x, y: c .position.y + fs.bsz * 0.5)
+        let goalCurvePoint  = CGPoint(x: bp.x, y: bp.y + fs.bsz * 0.5)
         
         if isLine {
             path.move   (to: startCurvePoint)
@@ -922,7 +976,7 @@ class Parnt: Block {
         path.addCurve(to: goalCurvePoint, control1: mAbove, control2: blockAbove)
         
         if !isLine {
-            path.addLine(to: c.position)
+            path.addLine(to: bp)
         }
         
         path.closeSubpath()
@@ -943,6 +997,10 @@ class Equal: Block {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    override var description: String { return " = " }
+    
+    
     
     var isLast = false
     

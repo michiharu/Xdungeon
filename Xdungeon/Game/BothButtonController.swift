@@ -1,15 +1,14 @@
 //
-//  Stationary.swift
+//  BothButtonController.swift
 //  Xdungeon
 //
-//  Created by michiharu on 2018/04/20.
+//  Created by michiharu on 2018/05/03.
 //  Copyright © 2018年 michiharu. All rights reserved.
 //
 
 import SpriteKit
-import GameplayKit
 
-class Stationary: SKNode {
+class BothButtonController: SKNode {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -18,9 +17,13 @@ class Stationary: SKNode {
     
     override init() {
         super.init()
+
     }
     
     func resetBothBtns() {
+        if let sctn = section {
+            if sctn == 1 { return }
+        }
         for btn in bothBtns { btn.removeFromParent() }
         bothBtns = []
         
@@ -31,7 +34,8 @@ class Stationary: SKNode {
             }
         }
         
-        if 6 < ints.count { return }
+        if 6 < ints.count  { return }
+        if ints.count < 3 { ints.append(1) }
         
         let tw = fs.bsz * CGFloat(ints.count)
         var a = -tw * 0.5
@@ -63,3 +67,4 @@ class Stationary: SKNode {
         return selectNums
     }
 }
+
