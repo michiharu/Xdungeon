@@ -154,7 +154,7 @@ final class NumLabel {
         
         
         // x
-        if isX {
+        if isX && num.mole != 0 {
             if !(num.deno == 1 && num.mole == 1) { a -= fs.space }
             ut.showLabel(label: x!, color: color, text: "x", y: 0)
             a = ut.setPositionX(anchor: a, node: x!)

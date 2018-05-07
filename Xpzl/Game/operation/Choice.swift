@@ -660,6 +660,18 @@ class Addition: Choice {
     
     final override func changeFormula() {
         
+        func removeMyParent(p: Parnt, ifCount: Int) {
+            if p.childBlocks.count == ifCount {
+                allBlocks.remove(at: allBlocks.index(of: p)!)
+                allBlocks.remove(at: allBlocks.index(of: p.cm)!)
+                if p.level == 0 { firstLayblocks.remove(at: firstLayblocks.index(of: p)!) }
+                if let pp = p.parent as? Parnt {
+                    removeMyParent(p: pp, ifCount: 1)
+                }
+                p.removeFromParent()
+            }
+        }
+        
         var leave: NumBlock?
         if correct.mole != 0 {
             // isFirst = true を残すブロックにする
@@ -706,6 +718,7 @@ class Addition: Choice {
             
             if let p = selects.first!.parent as? Parnt {
                 for s in selects { p.childBlocks.remove(at: p.childBlocks.index(of: s)!) }
+                removeMyParent(p: p, ifCount: 0)
             } else {
                 for s in selects { firstLayblocks.remove(at: firstLayblocks.index(of: s)!) }
             }
