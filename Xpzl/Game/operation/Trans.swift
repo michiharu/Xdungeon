@@ -185,12 +185,14 @@ class Trans: Operation {
         guard !(tb is Multi) else { return } //tb is not multi
         
         if let p = tb.parent as? Parnt {
-            if tb == p.childBlocks.first! { nextBlock = p.childBlocks[1] }
-            else if tb == p.childBlocks.last { beforeBlock = p.childBlocks[p.childBlocks.endIndex - 2] }
-            else {
-                let index = p.childBlocks!.index(of: tb)!
-                nextBlock   = p.childBlocks[index + 1]
-                beforeBlock = p.childBlocks[index - 1]
+            if  p.childBlocks.count != 1 {
+                if tb == p.childBlocks.first! { nextBlock = p.childBlocks[1]}
+                else if tb == p.childBlocks.last { beforeBlock = p.childBlocks[p.childBlocks.endIndex - 2] }
+                else {
+                    let index = p.childBlocks!.index(of: tb)!
+                    nextBlock   = p.childBlocks[index + 1]
+                    beforeBlock = p.childBlocks[index - 1]
+                }
             }
         } else {
             if tb == firstLayblocks.first     { nextBlock   = firstLayblocks[1]}
