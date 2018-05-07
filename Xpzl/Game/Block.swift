@@ -635,7 +635,11 @@ class CollectableBlock: NumBlock {
         }
         
         if let p = parent as? Parnt {
-            return checkAndSetSelfGroup(blocks: p.childBlocks)
+            if p.childBlocks.count == 1 {
+                return nil
+            } else {
+                return checkAndSetSelfGroup(blocks: p.childBlocks)
+            }
         } else {
             return checkAndSetSelfGroup(blocks: firstLayblocks)
         }
