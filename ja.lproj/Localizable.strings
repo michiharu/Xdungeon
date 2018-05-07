@@ -1,0 +1,28 @@
+/* 
+  Localizable.strings
+  Xdungeon
+
+  Created by michiharu on 2018/05/04.
+  Copyright © 2018年 michiharu. All rights reserved.
+*/
+"start!" = "プレイ スタート!";
+"Stage Select" = "ステージ選択";
+"Mode Select" = "モード選択";
+"High Score: " = "ハイスコア: ";
+"Stage" = "ステージ ";
+"Easy" = "かんたん";
+"Normal" = "ふつう";
+"Hard" = "難しい";
+"Hint 1-1-1" = "\" x = ? \"という式の形になるよう、ブロックを指でスライドさせましょう。";
+"Hint 1-1-2" = "";
+"Hint 1-2-1" = "互いに計算できるブロックが隣り合っているときに、";
+"Hint 1-2-2" = "それらをタップすると計算できます。";
+"Hint 2-1-1" = "丸い数字のボタンを長押しして、両辺に数字を掛けましょう。";
+"Hint 2-1-2" = "掛け算のブロックはタップすると計算できます。";
+"Hint 4-1-1" = "( ) の前のブロックをスライドさせて、";
+"Hint 4-1-2" = "( ) の中のブロックそれぞれに近づけましょう。";
+"Retry" = "リトライ";
+"Continue" = "コンティニュー";
+"Clear" = "クリア⭐️";
+"Game Over" = "Game Over!";
+"Home" = "ホーム";

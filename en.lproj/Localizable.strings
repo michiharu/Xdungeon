@@ -1,0 +1,28 @@
+/* 
+  Localizable.strings
+  Xdungeon
+
+  Created by michiharu on 2018/05/04.
+  Copyright © 2018年 michiharu. All rights reserved.
+*/
+"start!" = "Play Start!";
+"Stage Select" = "Stage Select";
+"Mode Select" = "Mode Select";
+"High Score: " = "High Score: ";
+"Stage" = "Stage ";
+"Easy" = "Easy";
+"Normal" = "Normal";
+"Hard" = "Hard";
+"Hint 1-1-1" = "Let's slide the block";
+"Hint 1-1-2" = "so that it is in the form of \" x = ? \".";
+"Hint 1-2-1" = "You can calculate by tapping on the block";
+"Hint 1-2-2" = "when the calculable blocks are next to each other.";
+"Hint 2-1-1" = "Hold down the round number button to multiply the both both sides.";
+"Hint 2-1-2" = "The multiplication block can be calculated by tapping it.";
+"Hint 4-1-1" = "Slide the previous block of ( )";
+"Hint 4-1-2" = "and overlay it on the block in ( ) to expand";
+"Retry" = "Retry";
+"Continue" = "Continue";
+"Clear" = "Clear⭐️";
+"Game Over" = "Game Over";
+"Home" = "Home";
