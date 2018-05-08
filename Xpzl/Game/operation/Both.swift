@@ -24,6 +24,7 @@ class Both: Operation {
         self.init()
         bothBtn = btn
         bothBtn.isSelected = true
+        bothBtn.zPosition = BRING_TO_FRONT
         
         fm.startAmination(duration: 0.24)
         
@@ -237,6 +238,9 @@ class Both: Operation {
                 t.labels.ns[t.labels.ns.count - 1].num = bs.num.copy()
                 t.isChangeContent = true
             }
+            print("bs.num : " + bs.num.description)
+            fm.startAmination(duration: 0.06)
+            fm.resetBlocks()
         } else {
             guard nowSelect != nil else { return }
             
@@ -246,9 +250,10 @@ class Both: Operation {
                 t.labels.ns[t.labels.ns.count - 1].num = Num(true, 1, 0)
                 t.isChangeContent = true
             }
+            print("bs is nil")
+            fm.startAmination(duration: 0.06)
+            fm.resetBlocks()
         }
-        fm.startAmination(duration: 0.06)
-        fm.resetBlocks()
     }
     
     func getTargetBlock() -> [NumBlock] {
@@ -273,6 +278,7 @@ class Both: Operation {
     }
     
     override func touchEnded(touch: UITouch, node: SKNode) {
+        print("end nowSelect is nil?: " + (nowSelect == nil).description)
         isTouched = false
         guard nowSelect != nil else { leave(); op = Trans(); return }
         
