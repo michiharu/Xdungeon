@@ -45,8 +45,9 @@ class Deployment: Operation {
         
         if multi.parent != parent {
             parent.cancelDeployment()
-            parent = multi.parent as! Parnt
-            parent.prepareDeployment()
+            if let p = multi.parent as? Parnt {
+                p.prepareDeployment()
+            }
         }
     }
     

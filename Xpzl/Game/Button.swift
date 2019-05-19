@@ -79,7 +79,7 @@ class ChoiceButton: Button {
         self.isX = isX
         self.num = num
         self.color = color
-        label = NumLabel(isX: isX)
+        label = NumLabel(isX: isX, num: num)
         addChildren(label.all)
         label.hideAllNode()
         width = label.change(isX: isX, num: num)
@@ -156,8 +156,7 @@ class BothSelect: Button {
         fatalError("init(coder:) has not been implemented")
     }
     
-    var num: Num!
-    let nl = NumLabel()
+    let nl = NumLabel(num: Num(true, 0, 0))
     
     var isSelected = false
     
@@ -170,7 +169,7 @@ class BothSelect: Button {
     
     convenience init(num: Num) {
         self.init()
-        self.num = num
+        self.nl.num = num
         setScale(0.7)
         
         shape = SKShapeNode(rectOf: CGSize(width: fs.bsz, height: fs.bsz), cornerRadius: fs.bsz * 0.5)
@@ -181,6 +180,6 @@ class BothSelect: Button {
         addChild(shape)
         
         nl.hideAllNode()
-        let _ = nl.change(isX: false, num: self.num)
+        let _ = nl.change(isX: false, num: num)
     }
 }

@@ -26,7 +26,7 @@ class StageGameScene: SKScene {
         super.init(size: size)
     }
     
-    convenience init(storyboard: UIStoryboard, gvc: GameViewController,size: CGSize) {
+    convenience init(storyboard: UIStoryboard, gvc: GameViewController, size: CGSize) {
         self.init(size: size)
         self.storyboard = storyboard
         self.gvc = gvc

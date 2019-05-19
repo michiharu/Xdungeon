@@ -20,6 +20,7 @@ enum Kind: String {
     case E = "E"// equal
 }
 
+// 分数のクラス
 class Num: CustomStringConvertible {
     var description: String {
         let pm: String = isPlus ? "+" : "-"
@@ -48,6 +49,7 @@ class Num: CustomStringConvertible {
         deno = deno/r
     }
 }
+
 extension Num: Equatable {
     static func == (l: Num,r: Num) -> Bool {
         if l.isPlus == r.isPlus &&
@@ -60,10 +62,14 @@ extension Num: Equatable {
     }
 }
 
-
+// 数のまとまりを表現するためのクラス
+// 表現する数の対象：2x, (-1/2) *,
+// 「(-1/2) *」といった数も表現するので数字＜NumLabel＜項の範囲の数の表現を担当する
 final class NumLabel {
     
-    let ut = LabelUtil()
+    var num: Num
+    
+    let fh: CGFloat = fs.fsz * 0.5
     var shape: SKShapeNode?
     
     var all : [SKNode] = []
@@ -78,8 +84,8 @@ final class NumLabel {
     var br2 : SKLabelNode! // bracket2
     var msyb: SKLabelNode? // Multiplication symbol
     
-    init(isX: Bool = false, isMuler: Bool = false) {
-        
+    init(isX: Bool = false, isMuler: Bool = false, num: Num) {
+        self.num = num
         // bracket1
         br1  = SKLabelNode(fontNamed: bracketFont)
         br1.verticalAlignmentMode = .center
@@ -145,40 +151,86 @@ final class NumLabel {
         var a: CGFloat = fs.space
         // -
         if !num.isPlus {
-            ut.showLabel(label: sign, color: color, text: "-", y: 0)
-            a = ut.setPositionX(anchor: a, node: sign)
+            showLabel(label: sign, color: color, text: "-", y: 0)
+            a = setPositionX(a, node: sign)
         }
         
         // 1/4
-        a = ut.setNumLabel(isX: isX, a: a, num: num, label: self, color: color)
-        
+        a = setNumLabel(isX: isX, a: a, color: color)
         
         // x
         if isX && num.mole != 0 {
             if !(num.deno == 1 && num.mole == 1) { a -= fs.space }
-            ut.showLabel(label: x!, color: color, text: "x", y: 0)
-            a = ut.setPositionX(anchor: a, node: x!)
+            showLabel(label: x!, color: color, text: "x", y: 0)
+            a = setPositionX(a, node: x!)
         }
-        ut.slideHalfLengthOfAnchor(a: a, nodes: all)
+        slideHalfLengthOfAnchor(a, nodes: all)
         a = a < fs.minbw ? fs.minbw : a
         w = a
         return a
     }
     
+    func showLabel(label: SKLabelNode, color: SKColor, text: String, y: CGFloat) {
+        label.isHidden = false
+        label.fontColor = color
+        label.text = text
+        label.position.y = y
+    }
+    
+    func setPositionX(_ anchor: CGFloat, node: SKNode) -> CGFloat {
+        node.position.x = anchor + node.frame.width * 0.5
+        return anchor + node.frame.width + fs.space
+    }
+    
+    func setNumLabel(isX: Bool,
+                     isMuler: Bool = false,
+                     a: CGFloat,
+                     color: SKColor) -> CGFloat {
+        if num.deno == 1 {
+            if isX && num.mole == 1 && !isMuler {
+                return a
+            } else {
+                showLabel(label: mole, color: color, text: String(num.mole), y: 0)
+                return setPositionX(a, node: mole)
+            }
+        } else {
+            showLabel(label: mole, color: color, text: String(num.mole), y: fh)
+            showLabel(label: deno, color: color, text: String(num.deno), y: -fh)
+            
+            let longer = max(mole.frame.width, deno.frame.width)
+            let barLength = longer + fs.space * 2
+            bar.isHidden = false
+            bar.run(SKAction.scaleX(to: barLength / fs.barw, duration: 0))
+            bar.fillColor = color
+            mole.position.x = a + barLength * 0.5
+            deno.position.x = a + barLength * 0.5
+            bar .position.x = a + barLength * 0.5
+            return a + barLength + fs.space
+        }
+    }
+    
+    func slideHalfLengthOfAnchor(_ a: CGFloat, nodes: [SKNode]) {
+        for node in nodes { node.position.x -= a * 0.5 }
+    }
+    
     func hideAllNode() {
-        ut.hideAllNode(nodes: all)
+        for node in all { node.isHidden = true }
     }
 }
 
+// 項の文字表現を担当するクラス
+// nsには後から数字が掛けられた際に配列の後ろに追加されているので、reverse()で反転している
+// 通常分母は０にならないことを利用して、分母の数(deno)が０のケースでは数字を表示しない
+// 両辺に掛け算する数が収まることを示す枠を表示する際に deno == 0 を設定する
 final class NumLabels {
     
-    var ns : [(num: Num, nl: NumLabel)] = []
+    var ns : [NumLabel] = []
     
     let ut = LabelUtil()
     let fh: CGFloat = fs.fsz * 0.5
     
     init(isX: Bool, num: Num) {
-        ns.append((num: num, NumLabel(isX: isX)))
+        ns.append(NumLabel(isX: isX, num: num))
     }
     
     final func change(_ nb: NumBlock) -> CGFloat {
@@ -191,7 +243,7 @@ final class NumLabels {
         // BothかつsetMulerの場合は先頭のmulerとshapeを特別に設定
         if nb.ss == .emphasize {
             isFirstMuler = false
-            a = setBothMuler(anchor: a, muler: ns.last!, isX: isX)
+            a = setBothMuler(a, muler: ns.last!, isX: isX)
         }
             
         for (i, n) in ns.reversed().enumerated() { // (-3)×..
@@ -208,73 +260,73 @@ final class NumLabels {
             
             // (
             if !isFirstMuler {
-                n.nl.br1.isHidden = false
-                a = ut.setPositionX(anchor: a, node: n.nl.br1)
+                n.br1.isHidden = false
+                a = ut.setPositionX(anchor: a, node: n.br1)
             }
             
             // -
             if !(nb.isFirst && isFirstMuler && n.num.isPlus) && !(!isFirstMuler && n.num.isPlus) {
-                ut.showLabel(label: n.nl.sign, color: color, text:  n.num.isPlus ? "+" : "-", y: 0)
-                a = ut.setPositionX(anchor: a, node: n.nl.sign)
+                ut.showLabel(label: n.sign, color: color, text:  n.num.isPlus ? "+" : "-", y: 0)
+                a = ut.setPositionX(anchor: a, node: n.sign)
             }
             
             // 3
             if !(isLastLoop && isX && n.num.mole == 1 && n.num.deno == 1) {
-                a = ut.setNumLabel(isX: isX, isMuler: true, a: a, num: n.num, label: n.nl, color: color)
+                a = ut.setNumLabel(isX: isX, isMuler: true, a: a, num: n.num, label: n, color: color)
             }
             
             // x (エックス)
             if isLastLoop && isX && n.num.mole != 0 {
                 if !(n.num.deno == 1 && n.num.mole == 1) { a -= fs.space }
-                ut.showLabel(label: n.nl.x!, color: color, text: "x", y: 0)
-                a = ut.setPositionX(anchor: a, node: n.nl.x!)
+                ut.showLabel(label: n.x!, color: color, text: "x", y: 0)
+                a = ut.setPositionX(anchor: a, node: n.x!)
             }
             
             // )
             if !isFirstMuler {
-                n.nl.br2.isHidden = false
-                a = ut.setPositionX(anchor: a, node: n.nl.br2)
+                n.br2.isHidden = false
+                a = ut.setPositionX(anchor: a, node: n.br2)
             }
             
             // × (掛け算記号)
             if !isLastLoop {
-                n.nl.msyb!.isHidden = false
-                a = ut.setPositionX(anchor: a, node: n.nl.msyb!)
+                n.msyb!.isHidden = false
+                a = ut.setPositionX(anchor: a, node: n.msyb!)
             }
             
             isFirstMuler = false
         }
         
-        slideHalfLengthOfAnchor(a: a)
+        slideHalfLengthOfAnchor(a)
         if a < fs.minbw { a = fs.minbw }
         return a
     }
     
-    final func setBothMuler(anchor: CGFloat, muler: (num: Num, nl: NumLabel), isX: Bool) -> CGFloat {
+    final func setBothMuler(_ anchor: CGFloat, muler: NumLabel, isX: Bool) -> CGFloat {
         var a = fs.space
         let color = ut.getColor(isPlus: muler.num.isPlus, isX: isX)
         
         if !muler.num.isPlus {
-            ut.showLabel(label: muler.nl.sign, color: color, text:  "-", y: 0)
-            a = ut.setPositionX(anchor: a, node: muler.nl.sign)
+            ut.showLabel(label: muler.sign, color: color, text:  "-", y: 0)
+            a = ut.setPositionX(anchor: a, node: muler.sign)
         }
         
         if muler.num.deno != 0 {
-            a = ut.setNumLabel(isX: isX, isMuler: true, a: a, num: muler.num, label: muler.nl, color: color)
+            a = ut.setNumLabel(isX: isX, isMuler: true, a: a, num: muler.num, label: muler, color: color)
         }
         
         if a < fs.minbw {
             let delta = fs.minbw - a
             a = fs.minbw
-            ut.slideHalfLengthOfAnchor(a: -delta, nodes: muler.nl.all)
+            ut.slideHalfLengthOfAnchor(-delta, nodes: muler.all)
         }
-        muler.nl.w = a
+        muler.w = a
         
         a = a + fs.space
         
         // × (掛け算記号)
-        muler.nl.msyb!.isHidden = false
-        a = ut.setPositionX(anchor: a, node: muler.nl.msyb!)
+        muler.msyb!.isHidden = false
+        a = ut.setPositionX(anchor: a, node: muler.msyb!)
         
         return a
     }
@@ -288,21 +340,21 @@ final class NumLabels {
     }
     
     func hideAllNode() {
-        for n in ns { ut.hideAllNode(nodes: n.nl.all) }
+        for n in ns { ut.hideAllNode(nodes: n.all) }
     }
     
     func setZPosition(z: CGFloat) {
-        for n in ns { for node in n.nl.all { node.zPosition = z }}
+        for n in ns { for node in n.all { node.zPosition = z }}
     }
     
-    func slideHalfLengthOfAnchor(a: CGFloat) {
-        for n in ns { ut.slideHalfLengthOfAnchor(a: a, nodes: n.nl.all) }
+    func slideHalfLengthOfAnchor(_ a: CGFloat) {
+        for n in ns { ut.slideHalfLengthOfAnchor(a, nodes: n.all) }
     }
     
     func addMuler(_ nb: NumBlock, num: Num) -> [SKNode] {
-        let nl = NumLabel(isX: ut.checkX(nb), isMuler: true)
-        ns.append((num.copy(), nl))
-        return nl.all
+        let muler = NumLabel(isX: ut.checkX(nb), isMuler: true, num: num)
+        ns.append(muler)
+        return muler.all
     }
 }
 
@@ -364,7 +416,7 @@ struct LabelUtil {
         return false
     }
     
-    func slideHalfLengthOfAnchor(a: CGFloat, nodes: [SKNode]) {
+    func slideHalfLengthOfAnchor(_ a: CGFloat, nodes: [SKNode]) {
         for node in nodes { node.position.x -= a * 0.5 }
     }
     
@@ -380,8 +432,6 @@ enum ShapeState {
 }
 
 class Block: SKNode {
-    
-    
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -533,7 +583,7 @@ class NumBlock: Block {
     final override func emphasizeLastMuler() {
         guard let l = labels.ns.last else { return }
         
-        let emphasizeWidth: CGFloat = l.nl.w
+        let emphasizeWidth: CGFloat = l.w
         
         if let s = shape {
             let scale = emphasizeWidth / s.frame.width
@@ -556,7 +606,7 @@ class NumBlock: Block {
     }
     
     func removeLastMuler() {
-        for node in labels.ns.last!.nl.all { node.removeFromParent() }
+        for node in labels.ns.last!.all { node.removeFromParent() }
         labels.ns.removeLast()
         shape!.position.x = 0
         ss = .have
@@ -566,10 +616,11 @@ class NumBlock: Block {
     final func getMultiAnswer(correct: Num) {
         for (i, n) in labels.ns.enumerated() {
             if i != 0 {
-                for node in n.nl.all { node.removeFromParent() }
+                for node in n.all { node.removeFromParent() }
             }
         }
-        labels.ns = [(correct, labels.ns.first!.nl)]
+        labels.ns = [labels.ns.first!]
+        labels.ns.first!.num = correct
         isChangeContent = true
     }
 }
@@ -600,7 +651,7 @@ class CollectableBlock: NumBlock {
         self.kind = kind; self.parentID = parentID; self.level = level
         
         labels = NumLabels(isX: kind == .X ? true : false, num: num)
-        addChildren(labels.ns.first!.nl.all)
+        addChildren(labels.ns.first!.all)
     }
     
     func checkAndSetCollectID() -> String? {
@@ -679,7 +730,7 @@ class Multi: NumBlock {
         self.parentID = parentID; self.level = level
         
         labels = NumLabels(isX: false, num: num)
-        addChildren(labels.ns.first!.nl.all)
+        addChildren(labels.ns.first!.all)
     }
     
     final func changeButtonMode() {
@@ -844,7 +895,9 @@ class Parnt: Block {
         newShape.lineWidth = 0
         newShape.fillColor = clr.shape
         newShape.zPosition = level
-        newShape.position.y = -fs.bsz * 0.36 - (maxLevel - level) * (fs.bsz * 0.3 + fs.space)
+        let l = maxLevel - level
+        let b = fs.bsz * 0.3 + fs.space
+        newShape.position.y = -fs.bsz * 0.36 - l * b
         addChild(newShape)
         newShape.run(SKAction.sequence([SKAction.fadeOut(withDuration: 0),
                                         SKAction.wait(forDuration: drtn!),
@@ -916,7 +969,9 @@ class Parnt: Block {
         childBlocks.first!.isFirst = isFirst
         for c in childBlocks {
             var target: NumBlock!
-            if let p = c as? Parnt { target = p.cm } else { target = c as! NumBlock }
+            if let p = c as? Parnt { target = p.cm }
+            else if let child = c as? NumBlock { target = child }
+            
             
             let copyNode = cm.copy() as! Multi
             let follow = SKAction.follow(makePath(isLine:false, child: target),
@@ -1065,14 +1120,17 @@ class Equal: Block {
         } else if isFirst {
             l.zero.isHidden = false
             a = eFW + zFW + fs.space * 4
-            l.zero .position.x = -a * 0.5 + fs.space + zFW * 0.5
-            let calc: CGFloat  = -a * 0.5 + zFW + eFW * 0.5
+            let nextA = -a * 0.5
+            let nextZFW = zFW * 0.5
+            l.zero .position.x = nextA + fs.space + nextZFW
+            let calc: CGFloat  = nextA + zFW + eFW * 0.5
             l.equal.position.x = calc + fs.space * 3
         } else {
             l.zero.isHidden = false
             a = eFW + zFW + fs.space * 4
-            l.equal.position.x = -a * 0.5 + fs.space + eFW * 0.5
-            let calc: CGFloat  = -a * 0.5 + eFW + zFW * 0.5
+            let nextA = -a * 0.5
+            l.equal.position.x = nextA + fs.space + eFW * 0.5
+            let calc: CGFloat  = nextA + eFW + zFW * 0.5
             l.zero .position.x = calc + fs.space * 3
         }
         width = a
