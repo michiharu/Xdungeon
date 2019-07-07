@@ -688,7 +688,7 @@ class Addition: Choice {
         if let l = leave {
             // 残すブロックの処理
             let changeLabel = SKAction.run {
-                l.labels.ns = [l.labels.ns.first!]
+                l.labels.ns[0].num = self.correct
                 l.isChangeContent = true
             }
             l.run(SKAction.sequence([fadeOut, changeLabel, fadeIn]))
